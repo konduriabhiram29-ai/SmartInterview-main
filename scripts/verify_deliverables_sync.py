@@ -63,6 +63,8 @@ for rel in expected_frozen_files:
 print("\n2. Checking Progressive Updates Copies (SmartInterview_Progressive_Updates/)...")
 expected_progressive_files = [
     "PROJECT_DOSSIER_v2.md",
+    "01_Documentation_and_Viva/SmartInterview_Documentation_Report_v2.docx",
+    "01_Documentation_and_Viva/SmartInterview_Documentation_Report_v2.pdf",
     "01_Documentation_and_Viva/SmartInterview_Master_Encyclopedia_and_Viva_Defense_v2.pdf",
     "01_Documentation_and_Viva/SmartInterview_Master_Encyclopedia_and_Viva_Defense_v2.docx",
     "01_Documentation_and_Viva/SmartInterview_Master_Encyclopedia_and_Viva_Defense_v2.md",
@@ -145,6 +147,44 @@ for d in diagram_files:
     exists = os.path.exists(d)
     sz = os.path.getsize(d) if exists else 0
     check(exists and sz > 10000, f"Diagram: {os.path.basename(d)}", f"Missing or corrupted (size {sz}B)")
+
+# ── CHECK 5: Base Papers & Institutional Identity Verification ──────────
+print("\n5. Verifying Base Papers & Institutional Details Consistency...")
+
+# Verify Base Papers in Research Paper
+check("Wahid" in rp_content and "IJERT" in rp_content, "Base Paper 1 (Wahid et al.) in Research Paper", "Base Paper 1 citation missing in Research Paper")
+check("Nagarajan" in rp_content and "IJMRR" in rp_content, "Base Paper 2 (Nagarajan et al.) in Research Paper", "Base Paper 2 citation missing in Research Paper")
+
+# Verify Team Roll Numbers in Research Paper
+roll_numbers = ["24BD1A665K", "24BD1A665R", "24BD1A665X", "25BD5A6615", "25BD5A6620"]
+for r in roll_numbers:
+    check(r in rp_content, f"Roll Number {r} in Research Paper", f"Roll number {r} missing in Research Paper")
+
+# Verify Base Papers & Team in Master Encyclopedia
+check("Wahid" in enc_content and "IJERT" in enc_content, "Base Paper 1 in Master Encyclopedia", "Base Paper 1 missing in Master Encyclopedia")
+check("Nagarajan" in enc_content and "IJMRR" in enc_content, "Base Paper 2 in Master Encyclopedia", "Base Paper 2 missing in Master Encyclopedia")
+for r in roll_numbers:
+    check(r in enc_content, f"Roll Number {r} in Master Encyclopedia", f"Roll number {r} missing in Master Encyclopedia")
+
+# Verify Faculty Mentor in Master Encyclopedia
+check("TVG Sridevi" in enc_content or "Sridevi" in enc_content, "Faculty Mentor Dr. TVG Sridevi in Master Encyclopedia", "Dr. TVG Sridevi missing in Master Encyclopedia")
+check("Computer Science and Engineering (AI&ML)" in enc_content, "Department CSE (AI&ML) in Master Encyclopedia", "Department CSE (AI&ML) missing in Master Encyclopedia")
+
+# Check SRS document contains Base Paper citations and Roll Numbers
+srs_docx = os.path.join(PROGRESSIVE_DIR, "02_SRS_Specification", "SmartInterview_SRS_Template_Format_v2.docx")
+check(os.path.exists(srs_docx) and os.path.getsize(srs_docx) > 50000, "SRS v2 DOCX File Integrity", "SRS DOCX missing or too small")
+
+# Check Official Documentation Report from SRDC template
+doc_rep_docx = os.path.join(PROGRESSIVE_DIR, "01_Documentation_and_Viva", "SmartInterview_Documentation_Report_v2.docx")
+check(os.path.exists(doc_rep_docx) and os.path.getsize(doc_rep_docx) > 2000000, "Official Documentation Report v2 DOCX Integrity", "Documentation Report DOCX missing or under 2MB")
+doc_rep_pdf = os.path.join(PROGRESSIVE_DIR, "01_Documentation_and_Viva", "SmartInterview_Documentation_Report_v2.pdf")
+check(os.path.exists(doc_rep_pdf) and os.path.getsize(doc_rep_pdf) > 200000, "Official Documentation Report v2 PDF Integrity", "Documentation Report PDF missing or under 200KB")
+
+# Check PPT slide count (must be 9 after removing guideline slide)
+import pptx
+ppt_file = os.path.join(PROGRESSIVE_DIR, "04_Presentation_and_Defense", "SmartInterview_Project_Presentation_v2.pptx")
+prs = pptx.Presentation(ppt_file)
+check(len(prs.slides) == 9, "Presentation Slide Count (Guideline Slide Removed)", f"Expected 9 slides, found {len(prs.slides)}")
 
 # ── SUMMARY ──────────────────────────────────────────────────────────
 print("\n======================================================================")

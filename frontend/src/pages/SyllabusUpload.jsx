@@ -163,50 +163,43 @@ export default function SyllabusUpload() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+      <div className="page-container flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin-slow rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <div className="page-container max-w-5xl fade-up">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600">
-            <BookOpen size={28} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-              Syllabus & Course Interview
-            </h1>
-            <p className="text-slate-500 mt-1 text-sm">
-              Upload your course syllabus, lecture slides, or exam reference material. Questions are strictly source-grounded in your documents.
-            </p>
-          </div>
+      <div className="page-header flex items-center gap-4 mb-8">
+        <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-sm">
+          <BookOpen size={28} />
+        </div>
+        <div>
+          <h1 className="page-title mb-1">Syllabus & Course Interview</h1>
+          <p className="page-subtitle max-w-2xl">
+            Upload your course syllabus, lecture slides, or exam reference material. Questions are strictly source-grounded in your documents.
+          </p>
         </div>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-medium flex items-center gap-3">
-          <AlertCircle size={18} className="shrink-0 text-red-500" />
-          <span>{error}</span>
+        <div className="error-banner mb-6 shadow-sm">
+          {error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column: Upload & Files */}
-        <div className="lg:col-span-6 space-y-6">
-          <div className="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+        <div className="flex flex-col gap-6">
+          <div className="card p-6 flex flex-col h-full shadow-sm border border-slate-100">
+            <div className="flex items-center justify-between mb-5 border-b border-slate-100/60 pb-4">
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <UploadCloud size={18} className="text-indigo-600" />
-                Upload Course Material
+                Course Material
               </h2>
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700">
-                PDF · DOCX · TXT
-              </span>
+              <span className="badge badge-indigo">PDF · DOCX · TXT</span>
             </div>
 
             {/* Dropzone */}
@@ -214,15 +207,15 @@ export default function SyllabusUpload() {
               onClick={() => fileInputRef.current?.click()}
               onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
               onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleFileSelect(e); }}
-              className="group border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 rounded-xl p-8 text-center cursor-pointer transition-all duration-200"
+              className="flex-shrink-0 group border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/50 rounded-2xl p-8 text-center cursor-pointer transition-all duration-300 shadow-sm relative overflow-hidden"
             >
-              <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                <UploadCloud size={24} />
+              <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-all">
+                <UploadCloud size={32} />
               </div>
-              <p className="font-semibold text-slate-700 text-sm">
+              <p className="text-base font-bold text-slate-900 mb-1">
                 Click or drag files here
               </p>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-500 max-w-[200px] mx-auto font-medium">
                 Upload university syllabus, lecture notes, or reference docs (up to 20 MB each)
               </p>
               <input
@@ -237,33 +230,34 @@ export default function SyllabusUpload() {
 
             {/* Uploaded Files List */}
             {uploadedFiles.length > 0 && (
-              <div className="mt-5 space-y-2">
-                <div className="flex items-center justify-between text-xs font-semibold text-slate-500 uppercase tracking-wider px-1">
-                  <span>Selected Files ({uploadedFiles.length})</span>
-                  <span>Size</span>
+              <div className="mt-6 flex-1 flex flex-col">
+                <div className="eyebrow text-slate-500 mb-3 px-1">
+                  Selected Files ({uploadedFiles.length})
                 </div>
-                {uploadedFiles.map((file) => (
-                  <div
-                    key={file.name}
-                    className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/70 hover:border-slate-300 transition-colors"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                      <FileText size={16} className="text-indigo-600 shrink-0" />
-                      <span className="text-sm font-medium text-slate-800 truncate">{file.name}</span>
+                <div className="space-y-2 flex-1 max-h-[160px] overflow-y-auto pr-1 custom-scrollbar">
+                  {uploadedFiles.map((file) => (
+                    <div
+                      key={file.name}
+                      className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/60 hover:border-slate-300 transition-colors shadow-sm"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <FileText size={18} className="text-indigo-500 shrink-0" />
+                        <span className="text-sm font-semibold text-slate-900 truncate">{file.name}</span>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0 ml-3">
+                        <span className="badge badge-slate text-[10px]">{(file.size / 1024).toFixed(0)} KB</span>
+                        <button
+                          type="button"
+                          onClick={() => removeFile(file.name)}
+                          className="text-slate-400 hover:text-red-500 p-1 rounded-md transition-colors hover:bg-red-50"
+                          title="Remove file"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0 ml-3">
-                      <span className="text-xs text-slate-400">{(file.size / 1024).toFixed(0)} KB</span>
-                      <button
-                        type="button"
-                        onClick={() => removeFile(file.name)}
-                        className="text-slate-400 hover:text-red-500 p-1 rounded transition-colors"
-                        title="Remove file"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
 
@@ -273,29 +267,30 @@ export default function SyllabusUpload() {
                 type="button"
                 onClick={handleProcessMaterial}
                 disabled={processing}
-                className="mt-5 w-full btn btn-primary py-3 text-sm flex items-center justify-center gap-2 rounded-xl font-semibold shadow-sm"
+                className="mt-6 w-full btn btn-primary py-3.5 shadow-md flex items-center justify-center gap-2 transition-all"
               >
                 {processing ? (
                   <>
-                    <Loader2 size={16} className="animate-spin" />
+                    <div className="animate-spin-slow rounded-full h-4 w-4 border-b-2 border-white"></div>
                     <span>{processingStatus}</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles size={16} />
+                    <Sparkles size={18} />
                     <span>Analyze & Extract Topics</span>
                   </>
                 )}
               </button>
             )}
 
-            {/* Processed Success Badge with Timing Metrics */}
+            {/* Processed Success Badge */}
             {processedData && (
-              <div className="mt-5 p-4 rounded-xl bg-emerald-50/80 border border-emerald-200">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2 text-emerald-800 font-semibold text-sm">
+              <div className="mt-6 p-5 rounded-xl bg-emerald-50/50 border border-emerald-200 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
                     <CheckCircle2 size={18} className="text-emerald-600" />
-                    <span>Document Processed Successfully</span>
+                    <span>Material Processed</span>
                   </div>
                   <button
                     type="button"
@@ -304,23 +299,20 @@ export default function SyllabusUpload() {
                       setSelectedTopics([]);
                       setUploadedFiles([]);
                     }}
-                    className="text-xs text-emerald-700 hover:text-emerald-900 font-medium flex items-center gap-1"
-                    title="Reset and upload new syllabus"
+                    className="badge badge-emerald bg-white cursor-pointer hover:bg-emerald-50 transition-colors flex items-center gap-1.5"
                   >
-                    <RotateCcw size={12} />
-                    <span>Reset</span>
+                    <RotateCcw size={12} /> Reset
                   </button>
                 </div>
 
-                {/* Stage Profiling Metrics Badge */}
                 {processedData.metrics && (
-                  <div className="mt-2 pt-2 border-t border-emerald-200/60 flex flex-wrap items-center gap-3 text-xs text-emerald-700">
-                    <span className="flex items-center gap-1">
+                  <div className="pt-3 border-t border-emerald-200/60 flex flex-wrap items-center gap-2 text-[10px] text-emerald-700 font-extrabold uppercase tracking-widest">
+                    <span className="flex items-center gap-1 bg-emerald-100/50 px-2 py-0.5 rounded">
                       <Clock size={12} /> Total: {processedData.metrics.total_elapsed_sec}s
                     </span>
-                    <span>• Extract: {processedData.metrics.stages?.extraction_sec}s</span>
-                    <span>• Topics: {processedData.metrics.stages?.topic_inference_sec}s</span>
-                    <span>• Vector DB: {processedData.metrics.stages?.embedding_and_chroma_sec}s</span>
+                    <span className="px-1.5">• Extract: {processedData.metrics.stages?.extraction_sec}s</span>
+                    <span className="px-1.5">• Topics: {processedData.metrics.stages?.topic_inference_sec}s</span>
+                    <span className="px-1.5">• RAG DB: {processedData.metrics.stages?.embedding_and_chroma_sec}s</span>
                   </div>
                 )}
               </div>
@@ -329,26 +321,26 @@ export default function SyllabusUpload() {
         </div>
 
         {/* Right Column: Inferred Topics & Start Session */}
-        <div className="lg:col-span-6 space-y-6">
-          <div className="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between min-h-[380px]">
-            <div>
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+        <div className="flex flex-col gap-6">
+          <div className="card p-6 flex flex-col h-full shadow-sm border border-slate-100">
+            <div className="flex-1 flex flex-col">
+              <div className="flex items-center justify-between mb-5 border-b border-slate-100/60 pb-4">
                 <div>
-                  <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <h2 className="text-base font-bold text-slate-900 flex items-center gap-2 mb-1">
                     <Layers size={18} className="text-indigo-600" />
                     Syllabus Topics
                   </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
                     {processedData
-                      ? `${selectedTopics.length} of ${processedData.topics?.length || 0} topics selected`
-                      : 'Topics will appear here once processed'}
+                      ? `${selectedTopics.length} of ${processedData.topics?.length || 0} selected`
+                      : 'Waiting for material'}
                   </p>
                 </div>
                 {processedData?.topics?.length > 0 && (
                   <button
                     type="button"
                     onClick={selectAllTopics}
-                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-transparent border-none cursor-pointer px-2 py-1 hover:bg-indigo-50 rounded transition-colors"
+                    className="badge badge-indigo bg-indigo-50 hover:bg-indigo-100 cursor-pointer transition-colors shadow-sm"
                   >
                     {selectedTopics.length === processedData.topics.length ? 'Deselect All' : 'Select All'}
                   </button>
@@ -357,15 +349,20 @@ export default function SyllabusUpload() {
 
               {/* Subject Tag */}
               {processedData?.subject && (
-                <div className="mb-4 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200/60 flex items-center gap-2">
-                  <span className="text-xs text-slate-400 font-semibold uppercase">Course Subject:</span>
-                  <span className="text-sm font-bold text-slate-800">{processedData.subject}</span>
+                <div className="mb-5 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3 shadow-sm">
+                  <span className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                    <BookOpen size={16} />
+                  </span>
+                  <div>
+                    <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-0.5">Course Subject</div>
+                    <div className="text-sm font-black text-slate-900">{processedData.subject}</div>
+                  </div>
                 </div>
               )}
 
               {/* Topics Grid */}
               {processedData?.topics?.length > 0 ? (
-                <div className="flex flex-wrap gap-2 pt-1 max-h-64 overflow-y-auto pr-1">
+                <div className="flex flex-wrap gap-2 pt-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                   {processedData.topics.map((topic) => {
                     const isSelected = selectedTopics.includes(topic);
                     return (
@@ -373,10 +370,10 @@ export default function SyllabusUpload() {
                         key={topic}
                         type="button"
                         onClick={() => toggleTopic(topic)}
-                        className={`px-3.5 py-1.5 text-xs font-medium rounded-full cursor-pointer transition-all border ${
+                        className={`px-4 py-2 text-xs font-bold rounded-xl cursor-pointer transition-all border shadow-sm ${
                           isSelected
-                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                            : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300 hover:bg-slate-50'
+                            ? 'bg-indigo-600 text-white border-indigo-600 drop-shadow-md scale-[1.02]'
+                            : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300 hover:bg-indigo-50/30'
                         }`}
                       >
                         {topic}
@@ -385,42 +382,44 @@ export default function SyllabusUpload() {
                   })}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-16 text-center text-slate-400">
-                  <Layers size={36} className="text-slate-300 mb-2" />
-                  <p className="text-sm font-medium text-slate-500">No topics detected yet</p>
-                  <p className="text-xs text-slate-400 max-w-xs mt-1">
-                    Upload your course document on the left and click &quot;Analyze &amp; Extract Topics&quot; to begin.
+                <div className="flex-1 flex flex-col items-center justify-center py-12 text-center">
+                  <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-4 border border-slate-100">
+                    <Layers size={32} className="text-slate-300" />
+                  </div>
+                  <h3 className="text-base font-bold text-slate-900 mb-1">No Topics Extracted</h3>
+                  <p className="text-sm text-slate-500 max-w-[240px] font-medium leading-relaxed">
+                    Upload your course document on the left and analyze it to view and select topics.
                   </p>
                 </div>
               )}
             </div>
 
             {/* Start Button */}
-            <div className="pt-6 border-t border-slate-100 mt-6">
+            <div className="pt-6 border-t border-slate-100/60 mt-6 shrink-0">
               <button
                 id="start-syllabus-interview-btn"
                 type="button"
                 onClick={handleStartInterview}
                 disabled={starting || !processedData || selectedTopics.length === 0}
-                className="btn btn-primary w-full py-3.5 text-sm font-bold rounded-xl shadow-md flex items-center justify-center gap-2 group transition-all duration-200"
+                className="btn btn-primary w-full py-4 text-sm font-bold shadow-md flex items-center justify-center gap-2 group transition-all"
               >
                 {starting ? (
                   <>
-                    <Loader2 size={18} className="animate-spin" />
-                    <span>Preparing Adaptive Session...</span>
+                    <div className="animate-spin-slow rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>Initializing Engine...</span>
                   </>
                 ) : (
                   <>
                     <Play size={18} />
-                    <span>Start Syllabus Interview</span>
-                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    <span>Start Exam Preparation</span>
+                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
               </button>
 
-              <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-slate-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                <span>Source-grounded questions with adaptive difficulty progression</span>
+              <div className="mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-slate-500">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Adaptive difficulty strictly grounded in your material</span>
               </div>
             </div>
           </div>

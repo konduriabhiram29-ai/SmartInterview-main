@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { Upload, FileText, Trash2, Check, UploadCloud, ChevronRight } from 'lucide-react';
+import { Upload, FileText, Trash2, Check, UploadCloud, ChevronRight, Briefcase } from 'lucide-react';
 
 export default function ResumeUpload() {
   const [resume, setResume] = useState(null);
@@ -153,8 +153,8 @@ export default function ResumeUpload() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+      <div className="page-container flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin-slow rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
@@ -162,30 +162,30 @@ export default function ResumeUpload() {
   const groupedSkills = categorizeSkills(resume?.skills);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <div className="page-container max-w-5xl fade-up">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 page-header">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold mb-3">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
-            Resume & Job Intelligence
+          <div className="badge badge-indigo mb-3 shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 mr-1.5 animate-pulse"></span>
+            Intelligence Engine
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Resume & Skills</h1>
-          <p className="text-slate-500 mt-1">Upload both your Resume and target Job Description to generate personalized interview scenarios.</p>
+          <h1 className="page-title">Resume & Skills</h1>
+          <p className="page-subtitle">Upload both your Resume and target Job Description to generate highly targeted interview scenarios.</p>
         </div>
+        
         {resume && (
-          <div className="mt-4 md:mt-0 flex flex-col md:items-end gap-3">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium">
-              <Check size={16} /> Active Parsing Engine v2.4
+          <div className="mt-5 md:mt-0 flex flex-col md:items-end gap-3">
+            <div className="badge badge-emerald shadow-sm px-3 py-1.5">
+              <Check size={14} className="mr-1" /> Active Parsing v2.4
             </div>
             {jobDescription ? (
-              <button onClick={() => navigate('/setup')} className="btn btn-primary">
-                Continue to Interview
-                <ChevronRight size={16} />
+              <button onClick={() => navigate('/setup')} className="btn btn-primary shadow-sm text-sm py-2">
+                Continue to Setup <ChevronRight size={16} className="ml-1" />
               </button>
             ) : (
-              <span className="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-md font-medium">
-                Upload Job Description to continue
+              <span className="badge badge-amber shadow-sm px-3 py-1.5">
+                Upload Job Description to unlock targeted mode
               </span>
             )}
           </div>
@@ -193,87 +193,75 @@ export default function ResumeUpload() {
       </div>
 
       {error && (
-        <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm font-medium">
+        <div className="error-banner mb-6 shadow-sm">
           {error}
         </div>
       )}
 
-      {/* 50/50 Equal Split Container: Resume (LEFT) & Job Description (RIGHT) */}
+      {/* 50/50 Equal Split Container */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        
         {/* LEFT: Resume */}
         <div className="flex flex-col">
-          <div className="text-sm font-semibold text-slate-700 mb-2 flex items-center justify-between">
-            <span>Resume</span>
-            {resume && <span className="text-xs text-emerald-600 font-medium flex items-center gap-1"><Check size={13} /> Uploaded</span>}
+          <div className="text-sm font-bold text-slate-800 mb-2.5 flex items-center justify-between">
+            <span className="flex items-center gap-1.5"><FileText size={16} className="text-indigo-600" /> Resume Profile</span>
+            {resume && <span className="badge badge-emerald py-0.5 text-[10px]">Uploaded</span>}
           </div>
 
           {!resume ? (
             <label
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => { e.preventDefault(); handleUpload(e); }}
-              className="flex flex-col items-center justify-center w-full h-72 border-2 border-dashed border-slate-300 rounded-xl bg-white hover:bg-slate-50 transition-colors cursor-pointer relative overflow-hidden group"
+              className="flex flex-col items-center justify-center w-full h-[300px] border-2 border-dashed border-slate-300 rounded-2xl bg-white hover:bg-indigo-50/50 hover:border-indigo-300 transition-colors cursor-pointer relative overflow-hidden group shadow-sm"
             >
-              <input
-                ref={fileRef}
-                type="file"
-                accept=".pdf"
-                className="hidden"
-                onChange={handleUpload}
-                disabled={uploading}
-              />
+              <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleUpload} disabled={uploading} />
               {uploading ? (
                 <div className="flex flex-col items-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-t-2 border-indigo-600 mb-4"></div>
-                  <p className="text-base font-semibold text-slate-900">Uploading and parsing...</p>
-                  <p className="text-xs text-slate-500 mt-1">This takes a few moments.</p>
+                  <div className="animate-spin-slow rounded-full h-12 w-12 border-b-2 border-t-2 border-indigo-600 mb-4"></div>
+                  <p className="text-sm font-bold text-slate-900">Parsing PDF...</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center text-center p-6">
-                  <div className="w-14 h-14 bg-indigo-50 rounded-full flex items-center justify-center mb-3 group-hover:bg-indigo-100 transition-colors">
-                    <UploadCloud size={28} className="text-indigo-600" />
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-indigo-100 group-hover:text-indigo-600 text-slate-400 transition-colors">
+                    <UploadCloud size={32} />
                   </div>
-                  <p className="text-lg font-semibold text-slate-900 mb-1">Upload your resume</p>
-                  <p className="text-xs text-slate-500 mb-5">Supports PDF format up to 5MB</p>
-                  <div className="btn btn-secondary text-sm py-2 px-4 pointer-events-none">Browse Files</div>
+                  <p className="text-base font-bold text-slate-900 mb-1">Upload Resume</p>
+                  <p className="text-xs text-slate-500 mb-5">PDF up to 5MB</p>
+                  <div className="btn btn-secondary text-xs pointer-events-none shadow-sm">Browse Files</div>
                 </div>
               )}
             </label>
           ) : (
-            <div className="card h-72 flex flex-col justify-between p-5 border border-slate-200">
-              <div className="flex items-start gap-3">
-                <div className="w-11 h-11 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 flex-shrink-0">
-                  <FileText size={22} />
+            <div className="card h-[300px] flex flex-col justify-between p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 flex-shrink-0 border border-indigo-100">
+                  <FileText size={24} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-slate-900 text-sm truncate" title={resume.filename || 'Resume.pdf'}>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="font-bold text-slate-900 text-base truncate" title={resume.filename || 'Resume.pdf'}>
                       {resume.filename || 'Resume.pdf'}
                     </span>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-100 text-emerald-700 flex-shrink-0">
-                      Verified
-                    </span>
                   </div>
-                  <div className="text-xs text-slate-500 space-y-1">
-                    {resume.name && (
-                      <div className="font-semibold text-slate-800">Candidate: {resume.name}</div>
-                    )}
+                  <div className="text-sm text-slate-500 space-y-1.5 font-medium">
+                    {resume.name && <div className="text-slate-800">Candidate: {resume.name}</div>}
                     <div>{resume.page_count || 1} page{resume.page_count === 1 ? '' : 's'}</div>
                     <div>Parsed {resume.uploaded_at ? new Date(resume.uploaded_at).toLocaleDateString() : new Date().toLocaleDateString()}</div>
-                    <div className="text-indigo-600 font-medium">{resume.skills?.length || 0} skills detected</div>
+                    <div className="text-indigo-600 font-bold">{resume.skills?.length || 0} skills detected</div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
-                <label className="btn btn-secondary cursor-pointer flex-1 justify-center text-xs py-2">
-                  <Upload size={14} /> Replace
+              <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+                <label className="btn btn-secondary cursor-pointer flex-1 text-xs justify-center">
+                  <Upload size={14} className="mr-1.5" /> Replace
                   <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleUpload} disabled={uploading} />
                 </label>
                 <button
                   onClick={handleDelete}
-                  className="btn bg-white border border-slate-200 text-red-600 hover:bg-red-50 hover:border-red-200 flex-1 justify-center text-xs py-2 shadow-sm"
+                  className="btn btn-danger flex-1 text-xs justify-center shadow-sm"
                 >
-                  <Trash2 size={14} /> Delete
+                  <Trash2 size={14} className="mr-1.5" /> Delete
                 </button>
               </div>
             </div>
@@ -282,75 +270,64 @@ export default function ResumeUpload() {
 
         {/* RIGHT: Job Description */}
         <div className="flex flex-col">
-          <div className="text-sm font-semibold text-slate-700 mb-2 flex items-center justify-between">
-            <span>Job Description</span>
-            {jobDescription && <span className="text-xs text-emerald-600 font-medium flex items-center gap-1"><Check size={13} /> Uploaded</span>}
+          <div className="text-sm font-bold text-slate-800 mb-2.5 flex items-center justify-between">
+            <span className="flex items-center gap-1.5"><Briefcase size={16} className="text-blue-600" /> Target Role (Optional)</span>
+            {jobDescription && <span className="badge badge-emerald py-0.5 text-[10px]">Uploaded</span>}
           </div>
 
           {!jobDescription ? (
             <label
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => { e.preventDefault(); handleJdUpload(e); }}
-              className="flex flex-col items-center justify-center w-full h-72 border-2 border-dashed border-slate-300 rounded-xl bg-white hover:bg-slate-50 transition-colors cursor-pointer relative overflow-hidden group"
+              className="flex flex-col items-center justify-center w-full h-[300px] border-2 border-dashed border-slate-300 rounded-2xl bg-white hover:bg-blue-50/50 hover:border-blue-300 transition-colors cursor-pointer relative overflow-hidden group shadow-sm"
             >
-              <input
-                ref={jdFileRef}
-                type="file"
-                accept=".pdf"
-                className="hidden"
-                onChange={handleJdUpload}
-                disabled={jdUploading}
-              />
+              <input ref={jdFileRef} type="file" accept=".pdf" className="hidden" onChange={handleJdUpload} disabled={jdUploading} />
               {jdUploading ? (
                 <div className="flex flex-col items-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-t-2 border-indigo-600 mb-4"></div>
-                  <p className="text-base font-semibold text-slate-900">Uploading and parsing...</p>
-                  <p className="text-xs text-slate-500 mt-1">This takes a few moments.</p>
+                  <div className="animate-spin-slow rounded-full h-12 w-12 border-b-2 border-t-2 border-blue-600 mb-4"></div>
+                  <p className="text-sm font-bold text-slate-900">Parsing PDF...</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center text-center p-6">
-                  <div className="w-14 h-14 bg-indigo-50 rounded-full flex items-center justify-center mb-3 group-hover:bg-indigo-100 transition-colors">
-                    <UploadCloud size={28} className="text-indigo-600" />
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-100 group-hover:text-blue-600 text-slate-400 transition-colors">
+                    <Briefcase size={32} />
                   </div>
-                  <p className="text-lg font-semibold text-slate-900 mb-1">Upload job description</p>
-                  <p className="text-xs text-slate-500 mb-5">Supports PDF format up to 5MB</p>
-                  <div className="btn btn-secondary text-sm py-2 px-4 pointer-events-none">Browse Files</div>
+                  <p className="text-base font-bold text-slate-900 mb-1">Upload Job Description</p>
+                  <p className="text-xs text-slate-500 mb-5">PDF up to 5MB</p>
+                  <div className="btn btn-secondary text-xs pointer-events-none shadow-sm">Browse Files</div>
                 </div>
               )}
             </label>
           ) : (
-            <div className="card h-72 flex flex-col justify-between p-5 border border-slate-200">
-              <div className="flex items-start gap-3">
-                <div className="w-11 h-11 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 flex-shrink-0">
-                  <FileText size={22} />
+            <div className="card h-[300px] flex flex-col justify-between p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0 border border-blue-100">
+                  <Briefcase size={24} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-slate-900 text-sm truncate" title={jobDescription.filename || 'JobDescription.pdf'}>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="font-bold text-slate-900 text-base truncate" title={jobDescription.filename || 'JobDescription.pdf'}>
                       {jobDescription.filename || 'JobDescription.pdf'}
                     </span>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-100 text-emerald-700 flex-shrink-0">
-                      Verified
-                    </span>
                   </div>
-                  <div className="text-xs text-slate-500 space-y-1">
+                  <div className="text-sm text-slate-500 space-y-1.5 font-medium">
                     <div>{jobDescription.page_count || 1} page{jobDescription.page_count === 1 ? '' : 's'}</div>
                     <div>Parsed {jobDescription.uploaded_at ? new Date(jobDescription.uploaded_at).toLocaleDateString() : new Date().toLocaleDateString()}</div>
-                    <div className="text-indigo-600 font-medium">{jobDescription.skills?.length || 0} skills detected</div>
+                    <div className="text-blue-600 font-bold">{jobDescription.skills?.length || 0} requirements</div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
-                <label className="btn btn-secondary cursor-pointer flex-1 justify-center text-xs py-2">
-                  <Upload size={14} /> Replace
+              <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+                <label className="btn btn-secondary cursor-pointer flex-1 text-xs justify-center">
+                  <Upload size={14} className="mr-1.5" /> Replace
                   <input ref={jdFileRef} type="file" accept=".pdf" className="hidden" onChange={handleJdUpload} disabled={jdUploading} />
                 </label>
                 <button
                   onClick={handleJdDelete}
-                  className="btn bg-white border border-slate-200 text-red-600 hover:bg-red-50 hover:border-red-200 flex-1 justify-center text-xs py-2 shadow-sm"
+                  className="btn btn-danger flex-1 text-xs justify-center shadow-sm"
                 >
-                  <Trash2 size={14} /> Delete
+                  <Trash2 size={14} className="mr-1.5" /> Delete
                 </button>
               </div>
             </div>
@@ -358,44 +335,32 @@ export default function ResumeUpload() {
         </div>
       </div>
 
-      {/* Role Alignment & Skill Mapping (Shown only when both Resume and JD are uploaded) */}
+      {/* Role Alignment & Skill Mapping */}
       {resume && jobDescription && skillMapping && (
-        <div className="card p-6 border border-indigo-100 bg-gradient-to-br from-white to-indigo-50/20 shadow-sm mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+        <div className="card p-6 border-indigo-100 bg-gradient-to-br from-white to-indigo-50/20 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100/60">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-slate-900 tracking-tight">Role Alignment & Skill Mapping</h2>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
-                  Targeted Plan
-                </span>
+                <h2 className="text-lg font-bold text-slate-900 tracking-tight">Role Alignment & Mapping</h2>
+                <span className="badge badge-indigo text-[10px]">Targeted Plan</span>
               </div>
               <p className="text-sm text-slate-500 mt-1">Comparison between your resume competencies and job requirements</p>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold rounded-lg">
-                {skillMapping.matched_skills?.length || 0} Matched
-              </span>
-              <span className="px-3 py-1 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold rounded-lg">
-                {skillMapping.gap_skills?.length || 0} Gap Areas
-              </span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className="badge badge-emerald">{skillMapping.matched_skills?.length || 0} Matched</span>
+              <span className="badge badge-amber">{skillMapping.gap_skills?.length || 0} Gaps</span>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Matched Skills */}
-            <div className="border border-emerald-100 bg-emerald-50/30 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
-                  <Check size={14} className="text-emerald-600" />
-                  Matched Skills ({skillMapping.matched_skills?.length || 0})
-                </span>
+            <div className="card border-emerald-100 bg-emerald-50/30 p-5">
+              <div className="eyebrow text-emerald-800 mb-3 flex items-center gap-1.5">
+                <Check size={14} className="text-emerald-600" /> Matched Skills
               </div>
               {skillMapping.matched_skills && skillMapping.matched_skills.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {skillMapping.matched_skills.map(s => (
-                    <span key={s} className="badge badge-success px-2.5 py-1 text-xs font-medium">
-                      {s}
-                    </span>
+                    <span key={s} className="badge badge-emerald bg-white text-xs">{s}</span>
                   ))}
                 </div>
               ) : (
@@ -403,39 +368,28 @@ export default function ResumeUpload() {
               )}
             </div>
 
-            {/* Gap Skills */}
-            <div className="border border-amber-100 bg-amber-50/30 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                  Target Role Gaps ({skillMapping.gap_skills?.length || 0})
-                </span>
+            <div className="card border-amber-100 bg-amber-50/30 p-5">
+              <div className="eyebrow text-amber-800 mb-3 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Target Gaps
               </div>
               {skillMapping.gap_skills && skillMapping.gap_skills.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {skillMapping.gap_skills.map(s => (
-                    <span key={s} className="badge badge-warning px-2.5 py-1 text-xs font-medium">
-                      {s}
-                    </span>
+                    <span key={s} className="badge badge-amber bg-white text-xs">{s}</span>
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-slate-500 italic">No skill gaps found for this job description.</p>
+                <p className="text-xs text-slate-500 italic">No skill gaps found.</p>
               )}
             </div>
           </div>
 
-          {/* Additional Skills on Resume */}
           {skillMapping.resume_only && skillMapping.resume_only.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-slate-100">
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                Additional Resume Competencies ({skillMapping.resume_only.length})
-              </div>
+            <div className="mt-5 pt-4 border-t border-slate-100/60">
+              <div className="eyebrow text-slate-500 mb-3">Additional Resume Competencies ({skillMapping.resume_only.length})</div>
               <div className="flex flex-wrap gap-1.5">
                 {skillMapping.resume_only.map(s => (
-                  <span key={s} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-normal bg-slate-100 text-slate-600">
-                    {s}
-                  </span>
+                  <span key={s} className="badge badge-slate bg-white text-xs">{s}</span>
                 ))}
               </div>
             </div>
@@ -443,38 +397,33 @@ export default function ResumeUpload() {
         </div>
       )}
 
-      {/* Extracted Details for Resume (Existing structure preserved intact) */}
+      {/* Extracted Details for Resume */}
       {resume && (
         <div className="space-y-6">
-          {/* Extracted Competencies */}
           <div className="card p-6">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100/60">
               <div>
-                <h2 className="text-lg font-bold text-slate-900 tracking-tight">Extracted Competencies</h2>
-                <p className="text-sm text-slate-500 mt-1">Categorized for interview question weighting</p>
+                <h2 className="text-base font-bold text-slate-900 tracking-tight">Extracted Competencies</h2>
+                <p className="text-xs text-slate-500 mt-1">Categorized for interview question weighting</p>
               </div>
-              <div className="px-3 py-1 bg-slate-100 text-slate-700 text-sm font-semibold rounded-lg">
-                {resume.skills?.length || 0} Detected
-              </div>
+              <div className="badge badge-slate shadow-sm">{resume.skills?.length || 0} Detected</div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {Object.entries(groupedSkills).map(([category, skills]) => {
                 if (skills.length === 0) return null;
                 
-                let badgeClass = "badge-primary";
-                if (category === 'DATABASES & SYSTEMS') badgeClass = "badge-success";
-                else if (category === 'DEVOPS & TESTING') badgeClass = "badge-warning";
-                else if (category === 'OTHER COMPETENCIES') badgeClass = "bg-slate-100 text-slate-700";
+                let badgeClass = "badge-indigo";
+                if (category === 'DATABASES & SYSTEMS') badgeClass = "badge-emerald";
+                else if (category === 'DEVOPS & TESTING') badgeClass = "badge-amber";
+                else if (category === 'OTHER COMPETENCIES') badgeClass = "badge-slate";
 
                 return (
-                  <div key={category} className="border border-slate-100 bg-slate-50/50 rounded-lg p-4">
-                    <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">{category}</div>
-                    <div className="flex flex-wrap gap-2">
+                  <div key={category} className="border border-slate-100 bg-slate-50/50 rounded-xl p-5">
+                    <div className="eyebrow text-slate-500 mb-3">{category}</div>
+                    <div className="flex flex-wrap gap-1.5">
                       {skills.map(s => (
-                        <span key={s} className={`badge ${badgeClass} px-2.5 py-1 text-sm`}>
-                          {s}
-                        </span>
+                        <span key={s} className={`badge ${badgeClass} bg-white text-xs shadow-sm`}>{s}</span>
                       ))}
                     </div>
                   </div>
@@ -483,29 +432,22 @@ export default function ResumeUpload() {
             </div>
           </div>
 
-          {/* Key Engineering Projects */}
           {resume.projects && resume.projects.length > 0 && (
             <div className="card p-6">
-              <div className="mb-6">
-                <h2 className="text-lg font-bold text-slate-900 tracking-tight">Key Engineering Projects</h2>
-                <p className="text-sm text-slate-500 mt-1">Highlighted projects used to formulate architecture questions</p>
+              <div className="mb-6 pb-4 border-b border-slate-100/60">
+                <h2 className="text-base font-bold text-slate-900 tracking-tight">Key Engineering Projects</h2>
+                <p className="text-xs text-slate-500 mt-1">Highlighted projects used to formulate architecture questions</p>
               </div>
               
               <div className="space-y-4">
                 {resume.projects.map((p, i) => (
-                  <div key={i} className="border border-slate-200 rounded-lg p-5 bg-white">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-base font-semibold text-slate-900">{p.name || `Project ${i + 1}`}</h3>
-                    </div>
-                    <p className="text-sm text-slate-600 mb-4 leading-relaxed">
-                      {p.description}
-                    </p>
+                  <div key={i} className="border border-slate-200 rounded-xl p-5 bg-slate-50/30">
+                    <h3 className="text-sm font-bold text-slate-900 mb-2">{p.name || `Project ${i + 1}`}</h3>
+                    <p className="text-sm text-slate-600 mb-4 leading-relaxed font-medium">{p.description}</p>
                     {p.technologies && p.technologies.length > 0 && (
                       <div className="flex flex-wrap gap-1.5">
                         {p.technologies.map(t => (
-                          <span key={t} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                            {t}
-                          </span>
+                          <span key={t} className="badge badge-slate bg-white shadow-sm text-xs">{t}</span>
                         ))}
                       </div>
                     )}
@@ -515,25 +457,22 @@ export default function ResumeUpload() {
             </div>
           )}
 
-          {/* Experience */}
           {resume.experience && resume.experience.length > 0 && (
             <div className="card p-6">
-              <div className="mb-6">
-                <h2 className="text-lg font-bold text-slate-900 tracking-tight">Experience & Career History</h2>
-                <p className="text-sm text-slate-500 mt-1">Extracted professional chronology</p>
+              <div className="mb-6 pb-4 border-b border-slate-100/60">
+                <h2 className="text-base font-bold text-slate-900 tracking-tight">Experience & Career History</h2>
               </div>
-
               <div className="space-y-6">
                 {resume.experience.map((exp, i) => (
                   <div key={i} className="relative pl-6 border-l-2 border-indigo-100 pb-2 last:pb-0 last:border-transparent">
-                    <div className="absolute w-3 h-3 bg-indigo-600 rounded-full -left-[7px] top-1.5 ring-4 ring-white"></div>
-                    <div className="mb-1">
-                      <h3 className="text-base font-semibold text-slate-900">{exp.role}</h3>
+                    <div className="absolute w-3 h-3 bg-indigo-600 rounded-full -left-[7px] top-1.5 ring-4 ring-white shadow-sm"></div>
+                    <div className="mb-2">
+                      <h3 className="text-sm font-bold text-slate-900">{exp.role}</h3>
                     </div>
                     {exp.description && (
-                      <ul className="mt-3 space-y-1.5 list-disc list-inside text-sm text-slate-600">
+                      <ul className="mt-2 space-y-2 list-disc list-outside ml-4 text-sm text-slate-600 font-medium leading-relaxed">
                         {exp.description.split('.').filter(Boolean).map((sentence, idx) => (
-                          <li key={idx}>{sentence.trim()}.</li>
+                          <li key={idx} className="pl-1">{sentence.trim()}.</li>
                         ))}
                       </ul>
                     )}

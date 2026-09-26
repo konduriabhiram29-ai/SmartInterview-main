@@ -1,4 +1,4 @@
-# start_backend.ps1 — Always run from project root, auto-loads .env
+# start_backend.ps1 - Always run from project root, auto-loads .env
 
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $ProjectRoot

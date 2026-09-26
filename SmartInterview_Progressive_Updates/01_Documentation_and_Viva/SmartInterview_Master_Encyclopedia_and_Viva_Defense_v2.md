@@ -1,9 +1,11 @@
 # SmartInterview: Complete Architectural Encyclopedia, Technical Specification & Master Viva Defense Guide
 
 **Personalized Technical Interview Preparation in Higher Education Using Retrieval-Augmented Generation and Bloom's Taxonomy**  
+*(SmartInterview — G-1392)*  
+**Project Review Identifier:** KR24_SDC-II_III-I_2026 Project Review-I | **Date:** 24-09-2026  
 **Document Classification**: Academic Project Master Documentation & Institutional Technical Blueprint  
-**Academic Degree**: Bachelor of Technology (B.Tech) in Computer Science and Engineering  
-**Department**: Department of Computer Science and Engineering, Keshav Memorial Institute of Technology (KMIT), Hyderabad  
+**Academic Degree**: Bachelor of Technology (B.Tech) in Computer Science and Engineering (AI&ML)  
+**Department**: Department of Computer Science and Engineering (AI&ML), Keshav Memorial Institute of Technology (KMIT), Hyderabad  
 **Affiliation**: Jawaharlal Nehru Technological University Hyderabad (JNTUH)  
 **Academic Year**: 2026  
 **Project Group / Team ID**: `Team G-1392`  
@@ -14,12 +16,90 @@
 
 | Member Name | University Roll Number | Department | Primary Technical Role |
 | :--- | :--- | :--- | :--- |
-| **Shamakura Saiteja Goud** | `24BD1A665K` | Computer Science & Engineering | Frontend Architecture, UI/UX State & Audio Visualizer |
-| **Vasireddy Vignesh Reddy** | `24BD1A665X` | Computer Science & Engineering | Database Persistence, Data Pipelines & Analytics Reporting |
-| **Thodsam Srujan** | `24BD1A665R` | Computer Science & Engineering | Voice Subsystem Integration (Edge-TTS & Whisper STT) |
-| **Aelugu Ranith Kumar** | `25BD5A6615` | Computer Science & Engineering | Adaptive Learning Engine & Bloom Cognitive State Machine |
-| **Konduri Abhiram** | `25BD5A6620` | Computer Science & Engineering | RAG Pipeline, Vector Ingestion, Scoring Formula & Groq LPU |
-| **Dr. TVG Sridevi** | *Faculty Guide & Mentor* | Professor, Dept. of CSE | Architectural Oversight & Research Paper Supervisor |
+| **Shamakura Saiteja Goud** | `24BD1A665K` | Computer Science and Engineering (AI&ML) | Project Review Lead & Frontend Architecture |
+| **Thodsam Srujan** | `24BD1A665R` | Computer Science and Engineering (AI&ML) | Voice Subsystem Integration (Edge-TTS & Whisper STT) |
+| **Vasireddy Vignesh Reddy** | `24BD1A665X` | Computer Science and Engineering (AI&ML) | Database Persistence, Data Pipelines & Analytics Reporting |
+| **Aelugu Ranith Kumar** | `25BD5A6615` | Computer Science and Engineering (AI&ML) | Adaptive Learning Engine & Bloom Cognitive State Machine |
+| **Konduri Abhiram** | `25BD5A6620` | Computer Science and Engineering (AI&ML) | RAG Pipeline, Vector Ingestion, Scoring Formula & Groq LPU |
+| **Dr. TVG Sridevi** | *Faculty Mentor* | Professor & Mentor, Dept. of CSE (AI&ML) | Pedagogical Scaffolding & Research Supervision |
+
+---
+
+### KMIT Institutional Front Matter & Accreditation Mapping
+
+#### Certificate
+This is to certify that this is a bonafide record of the project report titled **“Personalized Technical Interview Preparation in Higher Education (SmartInterview — G-1392)”** presented for **KR24_SDC-II_III-I_2026 Project Review-I** on **24-09-2026** by:
+1. **Shamakura Saiteja Goud** (24BD1A665K)
+2. **Thodsam Srujan** (24BD1A665R)
+3. **Vasireddy Vignesh Reddy** (24BD1A665X)
+4. **Aelugu Ranith Kumar** (25BD5A6615)
+5. **Konduri Abhiram** (25BD5A6620)
+
+In partial fulfillment for the B.Tech Degree in Computer Science and Engineering (AI&ML) at Keshav Memorial Institute of Technology (KMIT), affiliated to Jawaharlal Nehru Technological University Hyderabad (JNTUH), Narayanaguda, Hyderabad, Telangana - 500029.
+
+**Faculty Mentor**: Dr. TVG Sridevi  
+**Department**: Department of Computer Science and Engineering (AI&ML)  
+**Submitted for Project Review-I held on**: 24-09-2026
+
+---
+
+#### Vision & Mission of KMIT
+**Vision:**
+- To be the fountainhead in producing highly skilled, globally competent engineers.
+- Producing quality graduates trained in the latest software technologies and related tools, striving to make India a world leader in software products and services.
+
+**Mission:**
+- To provide a learning environment that inculcates problem-solving skills, professional, ethical responsibilities, and lifelong learning through multimodal platforms.
+- To establish industry-institute interaction to make students placement-ready for global software enterprises.
+- To provide exposure to students on state-of-the-art hardware and software tools.
+- To promote research-based projects and activities in emerging areas of technology convergence.
+
+---
+
+#### Program Outcomes (POs) & Project Outcomes (P1 - P4)
+
+##### Program Outcomes (PO1 to PO12):
+- **PO1. Engineering Knowledge**: Apply knowledge of mathematics, science, and engineering fundamentals to complex engineering problems.
+- **PO2. Problem Analysis**: Identify, formulate, review literature, and analyze complex engineering problems.
+- **PO3. Design/Development of Solutions**: Design solutions for complex engineering problems and system components that meet specified societal needs.
+- **PO4. Conduct Investigations**: Use research-based methods including design of experiments, analysis, and interpretation of data.
+- **PO5. Modern Tool Usage**: Create, select, and apply appropriate modern IT tools (FastAPI, React, ChromaDB, S-BERT, Groq).
+- **PO6. The Engineer and Society**: Apply reasoning informed by contextual knowledge to assess societal and educational employment issues.
+- **PO7. Environment and Sustainability**: Understand the impact of professional engineering solutions in societal contexts.
+- **PO8. Ethics**: Apply ethical principles and commit to professional ethics and academic integrity.
+- **PO9. Individual and Teamwork**: Function effectively as an individual, and as a member or leader in diverse teams.
+- **PO10. Communication**: Communicate effectively on complex engineering activities with the engineering community and society.
+- **PO11. Project Management and Finance**: Demonstrate knowledge and understanding of engineering and management principles.
+- **PO12. Life-Long Learning**: Recognize the need for, and have the ability to engage in independent and life-long learning.
+
+##### Project Outcomes (P1 - P4):
+- **P1**: Design and implement a domain-filtered Retrieval-Augmented Generation (RAG) knowledge engine using ChromaDB and Sentence-BERT embeddings (`all-MiniLM-L6-v2`) over 402 curated computer science topics.
+- **P2**: Implement a deterministic pedagogical state machine based on Bloom's Revised Taxonomy (6 cognitive levels) for adaptive question progression and remediation.
+- **P3**: Build an asynchronous, low-latency multimodal voice pipeline integrating in-browser Web Speech API / Whisper STT and in-memory Edge-TTS neural speech synthesis (<= 1.2s latency).
+- **P4**: Formulate a hybrid 5-factor mathematical rubric scoring engine (Technical, Completeness, Relevance, Semantic Cosine Similarity, Concept Coverage) paired with a responsive React dashboard and audit trails.
+
+##### Mapping of Project Outcomes with Program Outcomes:
+
+| Project Outcomes | PO1 | PO2 | PO3 | PO4 | PO5 | PO6 | PO7 | PO8 | PO9 | PO10 | PO11 | PO12 |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **P1** | 3 | 3 | 3 | 3 | 3 | 2 | 1 | 2 | 2 | 2 | 2 | 3 |
+| **P2** | 3 | 3 | 3 | 2 | 2 | 3 | 1 | 2 | 2 | 2 | 2 | 3 |
+| **P3** | 3 | 2 | 3 | 2 | 3 | 2 | 1 | 2 | 3 | 3 | 2 | 3 |
+| **P4** | 3 | 3 | 3 | 3 | 3 | 3 | 1 | 3 | 3 | 3 | 3 | 3 |
+
+*(Correlation Levels: 3 = Substantial/High, 2 = Moderate/Medium, 1 = Slight/Low)*
+
+---
+
+#### Declaration
+We hereby declare that the results embodied in this project report entitled **“Personalized Technical Interview Preparation in Higher Education (SmartInterview — G-1392)”** has been carried out by us for **KR24_SDC-II_III-I_2026 Project Review-I** dated **24-09-2026** under the guidance of Dr. TVG Sridevi, Department of Computer Science and Engineering (AI&ML), Keshav Memorial Institute of Technology (KMIT), and has not been submitted to any other university or institute for the award of any degree.
+
+**Team Signatures**:  
+1. Shamakura Saiteja Goud (24BD1A665K)  
+2. Thodsam Srujan (24BD1A665R)  
+3. Vasireddy Vignesh Reddy (24BD1A665X)  
+4. Aelugu Ranith Kumar (25BD5A6615)  
+5. Konduri Abhiram (25BD5A6620)  
 
 ---
 
@@ -783,23 +863,23 @@ The fundamental innovation that distinguishes SmartInterview from generic conver
 ### 9.1 Knowledge Base Corpus Structure
 SmartInterview does not rely on the LLM's ungrounded parametric memory. Instead, it indexes a curated, verified knowledge base consisting of **402 computer science chunks** spanning **8 core technical domains**:
 
-| Domain Identifier | Description & Topic Coverage | Chunk Count |
-| :--- | :--- | :--- |
-| `oop` | Object-Oriented Programming (Polymorphism, Inheritance, Encapsulation, Abstraction, SOLID) | 48 chunks |
-| `dsa` | Data Structures & Algorithms (Trees, Graphs, Sorting, Hash Maps, Dynamic Programming) | 64 chunks |
-| `dbms` | Database Management Systems (Indexing, Normalization, ACID, B-Trees, Transactions) | 56 chunks |
-| `os` | Operating Systems (Concurrency, Deadlocks, Virtual Memory, Process Scheduling) | 52 chunks |
-| `networks` | Computer Networks (TCP/IP, HTTP/HTTPS, DNS, OSI Layers, Sockets, Handshakes) | 44 chunks |
-| `system-design` | Distributed Systems (Load Balancers, Caching, CAP Theorem, Sharding, Message Queues) | 50 chunks |
-| `cloud-devops` | Cloud Infrastructure & CI/CD (Docker, Kubernetes, AWS primitives, Pipelines) | 42 chunks |
-| `ml-dl` | Machine Learning & Deep Learning (Supervised/Unsupervised, Neural Nets, Gradient Descent) | 46 chunks |
-| **Total** | **Curated Computer Science Knowledge Base (`technical_kb`)** | **402 Chunks** |
+| Domain Identifier | Description & Topic Coverage | Concepts | Chunk Count |
+| :--- | :--- | :--- | :--- |
+| `cn` | Computer Networks (OSI 7-Layer, TCP vs UDP, DNS, HTTP vs HTTPS, IPv4 vs IPv6) | 5 concepts | 33 chunks |
+| `dbms` | Database Management Systems (ACID, Indexing, Keys, Normalization, SQL Joins, Transactions) | 6 concepts | 45 chunks |
+| `design-patterns` | Software Design Patterns (Factory, Observer, Singleton, Strategy) | 4 concepts | 105 chunks |
+| `dsa` | Data Structures & Algorithms (Array, Binary, DP, Graph, Hash Table, Heap, Linked List, Matrix, Queue, Recursion, Sorting, Stack, String, Tree, Trie) | 15 concepts | 63 chunks |
+| `ml-dl` | Machine Learning & Deep Learning (Bias-Variance, Decision Trees, Linear/Logistic, Neural Networks, Overfitting) | 5 concepts | 35 chunks |
+| `oop` | Object-Oriented Programming (Abstraction, Composition/Inheritance, Encapsulation, Interfaces, Polymorphism) | 5 concepts | 33 chunks |
+| `os` | Operating Systems (Deadlock, Mutex vs Semaphore, Process vs Thread, Scheduling, Virtual Memory) | 5 concepts | 35 chunks |
+| `system-design` | Distributed System Design (Caching, CAP Theorem, Consistent Hashing, Load Balancing, Microservices) | 5 concepts | 53 chunks |
+| **Total** | **Curated Computer Science Knowledge Base (`technical_kb`)** | **50 Concepts** | **402 Chunks** |
 
 ### 9.2 Chunking Strategy & Overlap
 The knowledge base documents were split using a recursive semantic text splitter:
-- **Chunk Size**: 300 to 500 words (optimal context window for single technical concepts).
-- **Chunk Overlap**: 50 words sliding window.
-- **Rationale for Overlap**: Prevents semantic truncation at chunk boundaries. If an explanation of a B-Tree rebalancing operation spans across a cut point, the 50-word overlap ensures that both chunks retain sufficient semantic context to be retrieved accurately.
+- **Chunk Size**: Token count bounded between 50 and 400 tokens (average 195.47 tokens per chunk).
+- **Chunk Overlap**: Sliding boundary overlap to preserve semantic context across cut points.
+- **Rationale for Overlap**: Prevents semantic truncation at chunk boundaries. If an explanation of a B-Tree rebalancing operation spans across a cut point, the sliding window ensures that both chunks retain sufficient semantic context to be retrieved accurately.
 
 ### 9.3 Central Canonical Skill-to-Domain Mapping
 When the adaptive engine determines that the next question must probe a specific skill (e.g., `"sql"`), the system does not perform a naive vector search over all 402 chunks. Doing so risks retrieving irrelevant chunks from unrelated domains that share superficial vocabulary.
@@ -813,9 +893,9 @@ SKILL_DOMAIN_MAP = {
     "postgresql": ["dbms"],
     "java": ["oop", "dsa", "design-patterns"],
     "c++": ["oop", "dsa"],
-    "docker": ["cloud-devops"],
-    "kubernetes": ["cloud-devops", "system-design"],
-    "system design": ["system-design", "networks", "dbms"],
+    "docker": ["system-design"],
+    "kubernetes": ["system-design"],
+    "system design": ["system-design", "cn", "dbms"],
 }
 ```
 
@@ -831,7 +911,7 @@ results = collection.query(
     where={"domain": {"$in": target_domains}}
 )
 ```
-This guarantees with 100% mathematical certainty that when asking a database question about SQL, chunks from the `os` or `networks` domains are strictly excluded, eliminating cross-domain hallucination.
+This guarantees with 100% mathematical certainty that when asking a database question about SQL, chunks from the `os` or `cn` domains are strictly excluded, eliminating cross-domain hallucination.
 
 ---
 
@@ -1988,19 +2068,22 @@ graph TD
 Our accompanying IEEE conference research paper, titled **"Personalized Technical Interview Preparation in Higher Education Using Retrieval-Augmented Generation and Bloom's Taxonomy"** (Department of CSE, KMIT), establishes the theoretical foundation of SmartInterview.
 
 ### 25.1 Analysis of Base Papers & Literature Context
-SmartInterview builds directly upon four seminal contributions in educational computing and natural language processing:
-1. **Wahid, Jha, Munshi, Sonwane, & Chakrawarti (IJERT, March 2026)**:
-   - *Contribution*: Demonstrated voice-driven mock interviews using Gemini AI and Whisper.
-   - *Limitation Overcome by SmartInterview*: Wahid et al. used static prompt chains with ungrounded LLMs. SmartInterview introduces local domain-filtered RAG and deterministic Bloom cognitive state transitions.
-2. **Lewis et al. (NeurIPS 2020) — Retrieval-Augmented Generation**:
+SmartInterview builds directly upon and synthesizes five foundational contributions in educational computing, neural information retrieval, and conversational AI:
+1. **Wahid, Jha, Munshi, Sonwane, & Chakrawarti (IJERT, March 2026) — Base Paper 1**:
+   - *Contribution*: Demonstrated voice-driven mock interviews using Google Gemini AI and Whisper speech-to-text.
+   - *Limitation Overcome by SmartInterview*: Wahid et al. used static prompt chains with ungrounded LLMs. SmartInterview introduces local domain-filtered RAG over 402 curated topics, deterministic Bloom cognitive state transitions, and dual-engine resilience.
+2. **Nagarajan, Kumar, Vignesh, Nehal, & Musthafa (IJMRR, February 2026) — Base Paper 2**:
+   - *Contribution*: Developed an Autonomous AI Interview Engine using Sentence-BERT (S-BERT) for semantic resume-to-job matching, showing massive improvements over classical TF-IDF keyword matching.
+   - *Limitation Overcome by SmartInterview*: Restricted S-BERT solely to initial screening. SmartInterview extends S-BERT (`all-MiniLM-L6-v2`) to continuous real-time RAG context retrieval, answer semantic similarity calculation, and dynamic university syllabus ingestion.
+3. **Lewis et al. (NeurIPS 2020) — Retrieval-Augmented Generation**:
    - *Contribution*: Established the theoretical paradigm of augmenting parametric neural memory with non-parametric dense vector retrieval.
-   - *SmartInterview Adaptation*: Applied RAG to technical recruiting, using metadata filtering across 8 computer science domains to prevent topic drift.
-3. **Anderson & Krathwohl (2001) — A Revision of Bloom's Taxonomy of Educational Objectives**:
-   - *Contribution*: Structured human cognitive learning into 6 hierarchical dimensions.
+   - *SmartInterview Adaptation*: Applied RAG to technical recruiting, using metadata filtering across 8 computer science domains in ChromaDB to eliminate factual hallucinations.
+4. **Anderson & Krathwohl (2001) — A Revision of Bloom's Taxonomy of Educational Objectives**:
+   - *Contribution*: Structured human cognitive learning into 6 hierarchical dimensions (*Remember, Understand, Apply, Analyze, Evaluate, Create*).
    - *SmartInterview Adaptation*: Formalized the 6 tiers into an algorithmic state machine with deterministic mathematical transition thresholds.
-4. **Radford et al. (OpenAI, 2023) — Robust Speech Recognition via Large-Scale Weak Supervision (Whisper)**:
+5. **Radford et al. (OpenAI, 2023) — Robust Speech Recognition via Large-Scale Weak Supervision (Whisper)**:
    - *Contribution*: Demonstrated high zero-shot speech-to-text accuracy across diverse accents.
-   - *SmartInterview Adaptation*: Introduced technical vocabulary prompt conditioning to eliminate transcription errors on specialized programming syntax.
+   - *SmartInterview Adaptation*: Introduced technical vocabulary prompt conditioning and Web Speech API hybrid streaming to eliminate transcription errors on specialized programming syntax.
 
 ### 25.2 Empirical Research Findings & Ablation Study
 

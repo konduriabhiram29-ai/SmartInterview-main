@@ -21,6 +21,10 @@ This matrix documents the baseline ground truth across active code, database sch
 | **Voice Subsystem** | Edge-TTS (Audio synthesis) & Whisper API (STT) | Section 3.5 | Slide 8 | Section VI-A | Part 15.1-15.4 | Verified |
 | **Frontend Architecture** | React 18, Vite, React Router v6, Tailwind/CSS | Section 2.1 | Slide 4 | Section III-D | Part 18.1-18.4 | Verified |
 | **Backend Framework** | FastAPI, Uvicorn (Port 8000), Pydantic v2, SQLAlchemy | Section 2.2 | Slide 4 | Section III-D | Part 19.1-19.5 | Verified |
+| **Base Paper 1** | Wahid et al. (IJERT 2026) - Gemini & Whisper Voice Mock | Section 1.5 | Slide 3 | Section II-A | Chapter 1 & 2 | Verified |
+| **Base Paper 2** | Nagarajan et al. (IJMRR 2026) - S-BERT & LLMs Platform | Section 1.5 | Slide 3 | Section II-B | Chapter 1 & 2 | Verified |
+| **Team Roster (5 Members)** | Shamakura Saiteja Goud (24BD1A665K), Thodsam Srujan (24BD1A665R), Vasireddy Vignesh Reddy (24BD1A665X), Aelugu Ranith Kumar (25BD5A6615), Konduri Abhiram (25BD5A6620) | Page 1 & 2 | Slide 1 | Title / Authors | Certificate & Dec | Verified |
+| **Faculty Mentor** | Dr. TVG Sridevi, Dept of CSE (AI&ML) | Title Page | Slide 1 | Authors / Affiliation | Certificate | Verified |
 
 ---
 

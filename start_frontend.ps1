@@ -1,5 +1,5 @@
 # ============================================================
-# start_frontend.ps1 — Run from ANYWHERE, always works
+# start_frontend.ps1 - Run from ANYWHERE, always works
 # ============================================================
 
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -8,7 +8,7 @@ Set-Location $FrontendDir
 
 Write-Host ""
 Write-Host "===================================" -ForegroundColor Magenta
-Write-Host "  SmartInterview — Frontend Start  " -ForegroundColor Magenta
+Write-Host "  SmartInterview - Frontend Start  " -ForegroundColor Magenta
 Write-Host "===================================" -ForegroundColor Magenta
 Write-Host "Frontend dir: $FrontendDir" -ForegroundColor Gray
 Write-Host ""
@@ -18,7 +18,8 @@ if (-not (Test-Path "$FrontendDir\package.json")) {
     exit 1
 }
 
-Write-Host "Starting Vite frontend on http://localhost:5173" -ForegroundColor Yellow
+Write-Host "Starting Vite frontend on http://localhost:5174" -ForegroundColor Yellow
 Write-Host ""
 
 npm run dev
+

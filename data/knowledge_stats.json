@@ -302,8 +302,8 @@
   "total_concepts": 50,
   "total_chunks": 402,
   "dynamic_syllabi": {
-    "total_dynamic_syllabi": 9,
-    "total_dynamic_chunks": 1197,
+    "total_dynamic_syllabi": 11,
+    "total_dynamic_chunks": 1221,
     "sessions": {
       "distributed-systems": {
         "subject": "CS450: Distributed Systems & Cloud Architectures",
@@ -358,13 +358,25 @@
         "chunks": 154,
         "filename": "34_f220eb4a_SmartInterview_Masterclass.docx",
         "timestamp": "2026-09-26 03:10:27"
+      },
+      "17d739b09e2a4ab9bde6310e7e373654": {
+        "subject": "Computer Science Engineering",
+        "chunks": 23,
+        "filename": "SmartInterview_Quick_Revision_Cheatsheet_v2.pdf",
+        "timestamp": "2026-09-26 18:04:35"
+      },
+      "60f27de50b8d4672a83f88868520fc1a": {
+        "subject": "Computer Science",
+        "chunks": 1,
+        "filename": "dummy_syllabus.pdf",
+        "timestamp": "2026-09-26 18:15:08"
       }
     }
   },
-  "grand_total_chunks": 1599,
+  "grand_total_chunks": 1623,
   "uploaded_syllabi": {
-    "total_courses": 9,
-    "total_syllabus_chunks": 1197,
+    "total_courses": 11,
+    "total_syllabus_chunks": 1221,
     "courses": [
       {
         "course_id": "distributed-systems",
@@ -517,6 +529,46 @@
         ],
         "status": "PASS",
         "indexed_at": "2026-09-26 03:10:27"
+      },
+      {
+        "course_id": "17d739b09e2a4ab9bde6310e7e373654",
+        "subject": "Computer Science Engineering",
+        "filename": "SmartInterview_Quick_Revision_Cheatsheet_v2.pdf",
+        "domain": "computer-science-engineering",
+        "chunks": 23,
+        "topics": [
+          "Adaptive technical interview",
+          "Resume parsing with PyMuPDF",
+          "Retrieval\u2011augmented generation",
+          "Knowledge base chunks",
+          "Bloom taxonomy levels",
+          "FastAPI application tier",
+          "Groq LPU inference",
+          "Whisper large speech\u2011to\u2011text",
+          "Edge\u2011TTS voice synthesis",
+          "Semantic similarity scoring",
+          "Concept coverage metric",
+          "Embedding model all\u2011MiniLM\u2011L6\u2011v2",
+          "Database MySQL compliance"
+        ],
+        "status": "PASS",
+        "indexed_at": "2026-09-26 18:04:35"
+      },
+      {
+        "course_id": "60f27de50b8d4672a83f88868520fc1a",
+        "subject": "Computer Science",
+        "filename": "dummy_syllabus.pdf",
+        "domain": "computer-science",
+        "chunks": 1,
+        "topics": [
+          "Data Structures",
+          "Algorithms",
+          "Big O Notation",
+          "Sorting Algorithms",
+          "Hash Tables"
+        ],
+        "status": "PASS",
+        "indexed_at": "2026-09-26 18:15:08"
       }
     ]
   },
@@ -527,11 +579,11 @@
   },
   "summary": {
     "canonical_chunks": 402,
-    "uploaded_syllabus_chunks": 1197,
-    "grand_total_chunks": 1599,
+    "uploaded_syllabus_chunks": 1221,
+    "grand_total_chunks": 1623,
     "canonical_concepts": 50,
     "syllabus_course_modules": 44,
     "grand_total_knowledge_topics": 94,
-    "last_sync": "2026-09-26 03:10:27"
+    "last_sync": "2026-09-26 18:15:08"
   }
 }

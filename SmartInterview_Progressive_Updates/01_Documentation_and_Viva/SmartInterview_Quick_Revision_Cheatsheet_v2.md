@@ -1,13 +1,15 @@
 # SmartInterview: Master Quick-Revision Cheatsheet & Viva Defense Card
 
 **Personalized Technical Interview Preparation in Higher Education Using Retrieval-Augmented Generation and Bloom's Taxonomy**  
+*(SmartInterview — G-1392)*  
+**Project Review Identifier:** KR24_SDC-II_III-I_2026 Project Review-I | **Date:** 24-09-2026  
 **Document Classification**: Rapid Revision & Viva Defense Card  
-**Academic Degree**: Bachelor of Technology (B.Tech) in Computer Science and Engineering  
-**Department**: Department of Computer Science and Engineering, Keshav Memorial Institute of Technology (KMIT)  
+**Academic Degree**: Bachelor of Technology (B.Tech) in Computer Science and Engineering (AI&ML)  
+**Department**: Department of Computer Science and Engineering (AI&ML), Keshav Memorial Institute of Technology (KMIT)  
 **Affiliation**: Jawaharlal Nehru Technological University Hyderabad (JNTUH)  
 **Academic Year**: 2026 | **Project Team**: `Team G-1392`  
-**Team Members**: Shamakura Saiteja Goud (`24BD1A665K`), Vasireddy Vignesh Reddy (`24BD1A665X`), Thodsam Srujan (`24BD1A665R`), Aelugu Ranith Kumar (`25BD5A6615`), Konduri Abhiram (`25BD5A6620`)  
-**Faculty Guide & Mentor**: Dr. TVG Sridevi, Professor, Dept. of CSE, KMIT  
+**Team Members**: Shamakura Saiteja Goud (`24BD1A665K`), Thodsam Srujan (`24BD1A665R`), Vasireddy Vignesh Reddy (`24BD1A665X`), Aelugu Ranith Kumar (`25BD5A6615`), Konduri Abhiram (`25BD5A6620`)  
+**Faculty Mentor**: Dr. TVG Sridevi, Department of Computer Science and Engineering (AI&ML)  
 
 ---
 
@@ -22,7 +24,7 @@
 | Metric / Dimension | Exact System Value | Why This Number Matters |
 | :--- | :--- | :--- |
 | **Knowledge Base Chunks** | **402 Chunks** | Curated across 8 computer science domains in ChromaDB (`technical_kb`). |
-| **Technical Domains** | **8 Domains** | `oop`, `dsa`, `dbms`, `os`, `networks`, `system-design`, `cloud-devops`, `ml-dl`. |
+| **Technical Domains** | **8 Domains** | `cn` (33), `dbms` (45), `design-patterns` (105), `dsa` (63), `ml-dl` (35), `oop` (33), `os` (35), `system-design` (53) — 50 concepts, 402 chunks. |
 | **Embedding Dimensions** | **384 Dimensions** | Produced by `sentence-transformers/all-MiniLM-L6-v2` locally on CPU. |
 | **Embedding Parameters** | **22.7 Million** | Lightweight enough to vectorize sentences in under 15ms on commodity hardware. |
 | **Inference Generation** | **>500 tokens/sec** | Groq Cloud LPU running Tensor Streaming Processors (TSP). |

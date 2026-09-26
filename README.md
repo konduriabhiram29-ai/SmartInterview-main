@@ -1,291 +1,132 @@
 <div align="center">
-  <img src="frontend/public/logo.png" alt="SmartInterview Logo" width="120" />
-  <h1>SmartInterview</h1>
-  <p><strong>Next-Generation AI-Powered Adaptive Mock Interview Platform</strong></p>
-  <p>
-    <img src="https://img.shields.io/badge/FastAPI-0.115.0-009688.svg?style=flat&logo=FastAPI&logoColor=white" alt="FastAPI" />
-    <img src="https://img.shields.io/badge/React-18.3.1-61DAFB.svg?style=flat&logo=React&logoColor=black" alt="React" />
-    <img src="https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC.svg?style=flat&logo=tailwind-css&logoColor=white" alt="Tailwind" />
-    <img src="https://img.shields.io/badge/ChromaDB-0.6.3-FF6F00.svg?style=flat" alt="ChromaDB" />
-    <img src="https://img.shields.io/badge/Groq_Cloud-openai%2Fgpt--oss--120b-F55036.svg?style=flat" alt="Groq" />
-    <img src="https://img.shields.io/badge/Local_Ollama-Llama_3.1-000000.svg?style=flat" alt="Ollama" />
-    <img src="https://img.shields.io/badge/Embeddings-all--MiniLM--L6--v2-7952B3.svg?style=flat" alt="SBERT" />
-    <img src="https://img.shields.io/badge/Database-MySQL_8.0-4479A1.svg?style=flat&logo=mysql&logoColor=white" alt="MySQL" />
-  </p>
+  <div style="width: 80px; height: 80px; background-color: #4f46e5; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+  </div>
+  
+  # SmartInterview
+
+  **An Adaptive, AI-Powered Technical Interview & Examination Preparation Platform**
+
+  [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
+  [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+  [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+  [![Groq](https://img.shields.io/badge/Groq-F55036?style=for-the-badge&logo=groq&logoColor=white)](https://groq.com/)
+
 </div>
 
----
+<br />
 
-## 📖 Executive Summary
+SmartInterview revolutionizes how students and professionals prepare for technical assessments. By bridging the gap between passive studying and active recall, the platform provides hyper-realistic, dynamic mock interviews tailored explicitly to your target role or curriculum. 
 
-**SmartInterview** is an open-ended, adaptive technical interview simulation platform. While traditional technical interview platforms rely on static multiple-choice questions or rigid coding problems (like LeetCode), SmartInterview acts as an empathetic, pedagogical interviewer that conducts real-time, conversational technical interviews.
-
-SmartInterview incorporates three foundational engineering innovations:
-1. **Pedagogical Cognitive Engine (Bloom's Taxonomy):** Dynamically scales interview questions across 6 cognitive tiers (from Level 1 *Remember* to Level 6 *Create*) based on deterministic candidate proficiency scoring.
-2. **Strictly Grounded RAG Knowledge Base:** Employs ChromaDB vector storage (402 verified chunks across 8 core Computer Science domains) and `all-MiniLM-L6-v2` dense embeddings to eliminate LLM hallucinations.
-3. **Dual-Engine Resilient LLM Architecture:** Operates with ultra-low latency (~0.69s) via **Cloud Groq (`openai/gpt-oss-120b`)** while supporting a 100% offline, air-gapped mode via **Local Ollama (`llama3.1`)** with automatic live failover.
+Whether you're uploading a job description to prep for a software engineering interview, or uploading a university syllabus to cram for finals, SmartInterview dynamically adjusts its questioning using state-of-the-art **Retrieval-Augmented Generation (RAG)** and **Adaptive State-Machine Routing**.
 
 ---
 
-## 🏗️ System Architecture
+## 🌟 Core Features
 
-```mermaid
-graph TD
-    subgraph Frontend [React 18 + Vite — Port 5174]
-        UI[Candidate Dashboard]
-        Upload[Resume / JD / Syllabus Ingestion]
-        LiveAudio[Mic Audio Capture & TTS Player]
-    end
+- **🎯 Adaptive Resume Mode (Targeted Prep):**
+  - Upload your Resume and a Target Job Description.
+  - The AI parses your skills, identifies gaps against the JD, and dynamically selects difficulty curves (from Entry Level to Staff Engineer).
+  - Uses state-machine routing to adjust subsequent questions based on your real-time performance.
 
-    subgraph Backend [FastAPI — Port 8000]
-        Router[REST API Routers: Auth, Resumes, Interviews, Syllabus]
-        Extractor[PyMuPDF Text & Skill Parser]
-        AdaptiveEngine[Bloom's Taxonomy Adaptive State Machine]
-        EvalService[5-Factor Multi-Signal Answer Evaluator]
-        LLMHub[Resilient LLM Client Provider]
-    end
+- **📚 Course Syllabus Mode (RAG Architecture):**
+  - Upload entire study guides, syllabus PDFs, or textbook chapters.
+  - The backend chunks, embeds, and indexes the materials in **ChromaDB**.
+  - Creates a targeted exam covering exactly the subjects you requested—perfect for university prep.
 
-    subgraph Storage [Databases & Vectors]
-        MySQL[(MySQL 8: Users, Sessions, Evaluations)]
-        Chroma[(ChromaDB: 402 Core CS Chunks + Dynamic Syllabi)]
-    end
+- **🎙️ Real-time Voice Interaction:**
+  - Built-in live speech recognition allows you to simply click a button and speak your answers.
+  - Text-to-Speech (TTS) engine voices the interviewer's questions back to you, simulating the pressure of a real technical round.
 
-    subgraph AI_Inference [AI Providers]
-        Groq[Cloud Groq API: openai/gpt-oss-120b ~0.69s]
-        Ollama[Local Ollama: llama3.1 100% Offline ~6.0s]
-    end
-
-    UI -->|JWT Authenticated REST| Router
-    Upload -->|PDF/DOCX/TXT| Extractor
-    Extractor -->|Skills & Concepts| AdaptiveEngine
-    AdaptiveEngine -->|Cosine Vector Query| Chroma
-    Chroma -->|Retrieved Grounding Chunks| LLMHub
-    LLMHub -->|Cloud Primary| Groq
-    LLMHub -.->|Automatic Offline Failover| Ollama
-    Groq -->|Generated Question| LiveAudio
-    Ollama -->|Generated Question| LiveAudio
-    LiveAudio -->|Candidate Answer| EvalService
-    EvalService -->|Accuracy, Completeness, SBERT Score| AdaptiveEngine
-    AdaptiveEngine -->|Persist Metrics| MySQL
-```
+- **📊 Deep Analytics & PDFs:**
+  - Complete post-interview debriefs with scoring on Technical Accuracy, Completeness, Semantic Similarity, and Relevance.
+  - Generates comprehensive PDF reports of your performance.
 
 ---
 
-## ✨ Key Features & Capabilities
+## 🏗️ Architecture
 
-### 1. Dual-Engine LLM with Zero-Downtime Fallback
-* **Cloud Mode (Groq):** Powered by `openai/gpt-oss-120b`, delivering sub-second response times (~0.69s) for fluid conversational dialogue.
-* **Local Mode (Ollama):** Powered by local `llama3.1` (8B), enabling 100% offline, air-gapped interview execution with zero external data egress.
-* **Automatic Failover:** If internet connectivity drops mid-interview, the system seamlessly rescues the active session by routing prompts to your local Ollama instance.
+SmartInterview relies on a modern, decoupled microservice architecture:
 
-### 2. Pedagogical Question Generation via Bloom's Taxonomy
-Questions are never selected at random. An adaptive state machine modulates cognitive difficulty in real time:
-* **Level 1 (Remember):** Definitions, keyword recall, syntax facts.
-* **Level 2 (Understand):** Explaining mechanisms and architectural principles.
-* **Level 3 (Apply):** Code implementation and practical endpoint configuration.
-* **Level 4 (Analyze):** Debugging bottlenecks, diagnosing concurrency deadlocks.
-* **Level 5 (Evaluate):** Assessing trade-offs, justifying database architectures (ACID vs. BASE).
-* **Level 6 (Create):** Designing end-to-end distributed system architectures.
-
-### 3. Source-Grounded Vector RAG Knowledge Base
-* **Core Dataset (`technical_kb`):** 402 pre-indexed, quality-audited chunks across 8 core domains (`cn`, `dbms`, `design-patterns`, `dsa`, `ml-dl`, `oop`, `os`, `system-design`).
-* **Syllabus Mode:** Ingests academic course documents (PDF/DOCX/TXT), extracts syllabus modules, creates isolated temporary collections (`temp_syllabus_{id}`), and dynamically tracks live chunk metrics.
-
-### 4. 5-Factor Candidate Answer Evaluation
-Candidate answers are scored on a deterministic 100-point scale across 5 distinct dimensions:
-1. **Technical Accuracy (30%):** Factual correctness against verified RAG grounding.
-2. **Completeness (25%):** Depth of coverage addressing all parts of the question.
-3. **Relevance (15%):** Direct alignment with the technical topic without filler fluff.
-4. **Semantic Similarity (15%):** SBERT dense embedding distance to model reference answers.
-5. **Concept Keyword Coverage (15%):** Domain-specific lexical entity density.
-
-### 5. Neural Voice Interface & Performance Reporting
-* **Text-to-Speech (TTS):** Microsoft Neural voice synthesis (`edge-tts`).
-* **Speech-to-Text (STT):** Groq Whisper audio transcription.
-* **Automated PDF Reports:** Detailed downloadable interview scorecards compiled via `reportlab`.
+- **Frontend:** React SPA built with Vite, styled elegantly using Tailwind CSS v4 and Framer Motion. 
+- **Backend:** High-performance, asynchronous REST API powered by FastAPI (Python 3.10+).
+- **AI/LLM Engine:** Groq (Llama 3 / Mixtral) handles adaptive questioning, feedback generation, and semantic evaluations with lightning-fast inference.
+- **Vector DB:** ChromaDB powers the RAG pipeline for Syllabus Mode.
+- **Storage:** SQLite handles user states, sessions, and historic evaluation data.
 
 ---
 
-## ⚡ Live Empirical Benchmarks
-
-Tested on standard development hardware (Windows 11, Intel Core i5 / AMD Ryzen, 16 GB RAM):
-
-| Performance Dimension | ⚡ Cloud Groq (`openai/gpt-oss-120b`) | 🦙 Local Ollama (`llama3.1`) |
-| :--- | :--- | :--- |
-| **Average Generation Latency** | **0.69 seconds** *(~13x faster)* | **8.88 seconds** |
-| **Level 1 (Remember) Latency** | **0.66 seconds** | 13.39 seconds *(with warm-up)* |
-| **Level 3 (Apply) Latency** | **0.47 seconds** | 5.98 seconds |
-| **Level 5 (Evaluate) Latency** | **0.94 seconds** | 7.27 seconds |
-| **Evaluation Latency** | **1.14 seconds** | 10.41 seconds |
-| **Internet Requirement** | Active Connection | **0% (100% Offline)** |
-| **Privacy / Data Egress** | Encrypted HTTPS | **100% On-Device** |
-| **Schema Stability** | 80% *(requires padding)* | **100% Valid JSON** |
-
----
-
-## 🚀 Quickstart Guide
+## 🚀 Quick Start Guide
 
 ### Prerequisites
-* **Python 3.10+**
-* **Node.js 18+**
-* **MySQL Server 8.0+**
-* *(Optional for Offline Mode)*: **[Ollama](https://ollama.com/)** with `llama3.1` pulled (`ollama pull llama3.1`)
+- Node.js (v20+)
+- Python (3.10+)
+- A [Groq API Key](https://console.groq.com/keys)
 
----
-
-### Step 1: Clone & Configure Credentials
-
+### 1. Clone & Environment Setup
 ```bash
-git clone https://github.com/konduriabhiram29-ai/SmartInterview-main.git
-cd SmartInterview-main
-```
+git clone https://github.com/yourusername/Smart-Interview-main.git
+cd Smart-Interview-main
 
-Copy the example environment configuration:
-```bash
+# Set up the environment variables
 cp .env.example .env
+# Edit .env and insert your GROQ_API_KEY
 ```
 
-Open `.env` and set your credentials:
-```env
-# ── AI Provider Configuration ──
-# Set to "groq" for Cloud (sub-second) or "ollama" for 100% Offline
-LLM_PROVIDER=groq
-GROQ_API_KEY=your_groq_api_key_here
-GROQ_MODEL=openai/gpt-oss-120b
-GROQ_FALLBACK_MODEL=openai/gpt-oss-20b
-
-# Local Ollama Settings
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.1
-
-# ── Relational Database ──
-DATABASE_URL=mysql+pymysql://root:YOUR_PASSWORD@localhost:3306/smartinterview
-
-# ── Security & Authentication ──
-JWT_SECRET_KEY=your_secure_random_64_char_hex_key
-JWT_ALGORITHM=HS256
-JWT_EXPIRATION_MINUTES=1440
-```
-
----
-
-### Step 2: Database Initialization
-
-Initialize the database schema:
+### 2. Backend Initialization
 ```bash
-mysql -u root -p < backend/setup_database.sql
-```
-
----
-
-### Step 3: Start the Backend (FastAPI)
-
-```bash
-cd backend
+# Create and activate a virtual environment
 python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Windows:
-venv\Scripts\activate
-# Linux/Mac:
-# source venv/bin/activate
+# Install dependencies
+pip install -r backend/requirements.txt
 
-pip install -r requirements.txt
-python -m uvicorn app.main:app --port 8000 --reload
+# Start the FastAPI server
+cd backend
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
-* Backend API: `http://localhost:8000`
-* Swagger Interactive Docs: `http://localhost:8000/docs`
+*The API is now running at `http://localhost:8000` (Docs at `http://localhost:8000/docs`).*
 
----
-
-### Step 4: Start the Frontend (React + Vite)
-
-In a separate terminal:
+### 3. Frontend Initialization
+Open a new terminal window.
 ```bash
 cd frontend
+
+# Install packages
 npm install
+
+# Start the Vite development server
 npm run dev
 ```
-* Frontend Web App: `http://localhost:5174` (or `http://localhost:5173`)
+*The app is now running at `http://localhost:5174`.*
 
 ---
 
-## 📴 Running 100% Offline (Air-Gapped Mode)
+## 🧪 Running Tests
+The project features an automated End-to-End (E2E) testing suite using Playwright.
+```bash
+# Install playwright browsers
+python -m playwright install
 
-To run the complete platform without any internet connection:
-1. Ensure Ollama is running: `ollama run llama3.1`
-2. In your `.env` file, set:
-   ```env
-   LLM_PROVIDER=ollama
-   ```
-3. Disconnect Wi-Fi. The entire application (FastAPI, React, MySQL, ChromaDB vector search, Llama 3.1 question generation, and answer scoring) will run completely offline on your local machine!
-
----
-
-## 📡 REST API Reference
-
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `POST` | `/api/auth/register` | Register new candidate account |
-| `POST` | `/api/auth/login` | Authenticate user & return JWT token |
-| `GET` | `/api/auth/me` | Fetch active user profile |
-| `POST` | `/api/resumes/upload` | Upload & parse candidate resume (PDF) |
-| `POST` | `/api/job-descriptions/upload` | Upload & parse target Job Description (PDF) |
-| `POST` | `/api/syllabus/upload` | Upload academic syllabus (PDF/DOCX/TXT) for Syllabus Mode |
-| `POST` | `/api/interviews/sessions` | Create a new adaptive mock interview session |
-| `GET` | `/api/interviews/sessions/{id}/question` | Generate next adaptive question via RAG & Bloom's Taxonomy |
-| `POST` | `/api/interviews/sessions/{id}/answer` | Submit candidate answer & compute 5-factor evaluation score |
-| `GET` | `/api/interviews/sessions/{id}/report` | Generate downloadable PDF performance scorecard |
-| `GET` | `/api/knowledge-stats` | Live inspection of ChromaDB collections and chunk counts |
-| `GET` | `/api/health` | Service health status check |
+# Run the test suite
+python tests/fixtures/test_e2e.py
+```
 
 ---
 
-## 📂 Project Directory Structure
+## 📖 Academic Deliverables
+All synchronized academic documentation and artifacts for this project are located in:
+- `SmartInterview_Deliverables/`: Finalized frozen artifacts.
+- `SmartInterview_Progressive_Updates/`: Live versioned documents (SRS, Research Paper, Master Encyclopedia).
 
-```text
-SmartInterview-main/
-├── backend/
-│   ├── app/
-│   │   ├── dependencies/       # JWT auth & DB session injection
-│   │   ├── models/             # SQLAlchemy ORM schemas (Users, Sessions, Questions)
-│   │   ├── routers/            # FastAPI endpoints (auth, resumes, interviews, etc.)
-│   │   ├── schemas/            # Pydantic request/response validation
-│   │   ├── services/           # Core business logic:
-│   │   │   ├── bloom.py        # Bloom's Taxonomy state definitions
-│   │   │   ├── llm_client.py   # Resilient Unified LLM Provider (Groq + Ollama)
-│   │   │   ├── question_service.py # Adaptive question synthesis
-│   │   │   ├── evaluation_service.py # 5-factor answer scoring
-│   │   │   ├── syllabus_rag_service.py # Syllabus chunking & dynamic RAG
-│   │   │   └── voice_service.py # edge-tts & Whisper transcription
-│   │   ├── config.py           # Application environment loader
-│   │   └── main.py             # FastAPI entrypoint & middleware
-│   ├── requirements.txt        # Python backend dependencies
-│   └── setup_database.sql      # MySQL schema creation script
-├── frontend/
-│   ├── src/
-│   │   ├── components/         # Reusable UI Lego blocks (Sidebar, Header, Cards)
-│   │   ├── context/            # React AuthContext & Global state
-│   │   ├── pages/              # View pages (Login, Dashboard, Interview, Reports)
-│   │   └── App.jsx             # Main routing component
-│   ├── package.json            # Node.js dependencies
-│   └── vite.config.js          # Vite configuration with /api reverse proxy
-├── chroma_db/                  # Local persistent vector database (402 CS chunks)
-├── data/
-│   ├── processed/              # Curated 50 concepts across 8 domains
-│   └── knowledge_stats.json    # Canonical knowledge base statistics
-├── scripts/
-│   ├── generate_question.py    # Standalone CLI interview runner
-│   ├── ingest_vector_db.py     # Vector database ingestion tool
-│   └── verify_deliverables_sync.py # Deliverables synchronization auditor
-├── SmartInterview_Deliverables/ # Frozen baseline academic deliverables
-├── SmartInterview_Progressive_Updates/ # Active synchronized project documents
-├── .env.example                # Configuration template
-├── .gitignore                  # Git exclusion rules (protects secrets)
-└── README.md                   # Project documentation
+You can verify the codebase synchronization at any time by running:
+```bash
+python scripts/verify_deliverables_sync.py
 ```
 
 ---
 
 <div align="center">
-  <sub>Built with ❤️ using FastAPI, React, ChromaDB, Groq, and Ollama.</sub>
+  <i>Built with passion for the future of education and career preparation.</i>
 </div>

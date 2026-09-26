@@ -1,7 +1,12 @@
 # SmartInterview: 5-Member Team Presentation Script & Technical Defense Guide
 
-**Project Name:** SmartInterview — Agentic Adaptive Technical Mock Interview Platform  
-**Target Audience:** Academic Evaluator / Madam / Project Guide  
+**Project Name:** Personalized Technical Interview Preparation in Higher Education  
+**Project Alias & Team Code:** (SmartInterview — G-1392)  
+**Review Identifier:** KR24_SDC-II_III-I_2026 Project Review-I  
+**Date of Review:** 24-09-2026  
+**Faculty Mentor:** Dr. TVG Sridevi  
+**Department:** Department of Computer Science and Engineering (AI&ML)  
+**Target Audience:** Academic Evaluator / Madam / Faculty Mentor  
 **Format:** 5 Team Members (20% Equal Allocation, ~3 to 4 Minutes per Member, Total: 18-20 Minutes)  
 **System Status:** Live & Verified (Backend: `http://127.0.0.1:8000`, Frontend: `http://localhost:5174`, MySQL: `Port 3306`, ChromaDB: `402 Chunks`)  
 
@@ -25,19 +30,19 @@
 ## Master Team Allocation Matrix
 
 ```
-[Member 1: Overview, Architecture & Auth] (0:00 - 3:30)
+[Member 1: Shamakura Saiteja Goud - Overview, Architecture & Auth] (0:00 - 3:30)
          │
          ▼
-[Member 2: Context Ingestion & Skill Gap] (3:30 - 7:00)
+[Member 2: Thodsam Srujan - Context Ingestion & Skill Gap] (3:30 - 7:00)
          │
          ▼
-[Member 3: RAG Grounding & Question Gen] (7:00 - 10:30)
+[Member 3: Vasireddy Vignesh Reddy - RAG Grounding & Question Gen] (7:00 - 10:30)
          │
          ▼
-[Member 4: Bloom Adaptive State Machine] (10:30 - 14:00)
+[Member 4: Aelugu Ranith Kumar - Bloom Adaptive State Machine] (10:30 - 14:00)
          │
          ▼
-[Member 5: Multi-Factor Scoring & Voice] (14:00 - 17:30)
+[Member 5: Konduri Abhiram - Multi-Factor Scoring & Voice] (14:00 - 17:30)
          │
          ▼
 [Team Q&A with Madam] (17:30 - 20:00)
@@ -46,12 +51,13 @@
 ---
 
 ## MEMBER 1: Project Overview, Full-Stack Architecture & Authentication
+- **Speaker:** Shamakura Saiteja Goud (`24BD1A665K`)
 - **Role:** System Architect & Backend Infrastructure Lead
 - **Time Allocated:** 3.5 Minutes (0:00 - 3:30)
 - **Primary Goal:** Hook the evaluator, define why generic AI fails, present the full-stack architecture, and explain stateless user security.
 
 ### 1. What to Tell (Speaking Script)
-> "Good morning Madam. Today, our team is presenting **SmartInterview — an AI-Powered Adaptive Mock Interview Intelligence Platform**.
+> "Good morning Madam. Today, our team is presenting **Personalized Technical Interview Preparation in Higher Education (SmartInterview — G-1392)**. I am Shamakura Saiteja Goud.
 >
 > In today's hiring landscape, candidates face two extremes:
 > 1. **Static platforms** like LeetCode or GeeksforGeeks only test syntax and static algorithms without assessing cognitive depth, technical articulation, or system tradeoffs.
@@ -94,17 +100,18 @@
   *Answer:* "Each protected request sends an `Authorization: Bearer <token>` header. Our `get_current_user` dependency decodes the token using the secret key and HS256 algorithm, validates expiration, extracts the user ID, and queries the database session."
 
 > **Transition to Member 2:**  
-> *"Now, my teammate [Member 2 Name] will explain our Context Ingestion Engine and how we perform deterministic Resume and Job Description skill gap mapping."*
+> *"Now, my teammate Thodsam Srujan will explain our Context Ingestion Engine and how we perform deterministic Resume and Job Description skill gap mapping."*
 
 ---
 
 ## MEMBER 2: Context Ingestion — Resume Parsing, JD Filtering & Skill Gap Mapping
+- **Speaker:** Thodsam Srujan (`24BD1A665R`)
 - **Role:** Data Ingestion & NLP Preprocessing Lead
 - **Time Allocated:** 3.5 Minutes (3:30 - 7:00)
 - **Primary Goal:** Explain deterministic document parsing, regex section cleanup, and the Group A vs Group B skill intersection logic.
 
 ### 1. What to Tell (Speaking Script)
-> "Thank you [Member 1]. I am [Name], and I will present our **Context Ingestion and Skill Gap Analysis Pipeline**.
+> "Thank you Saiteja. I am Thodsam Srujan, and I will present our **Context Ingestion and Skill Gap Analysis Pipeline**.
 >
 > Generic mock interview platforms ask generic questions because they lack candidate context. SmartInterview tailors every session by analyzing two essential documents: the candidate's **Resume** and the target **Job Description (JD)**.
 >
@@ -146,17 +153,18 @@
   *Answer:* "PyMuPDF (`fitz`) is written in C (MuPDF library) and benchmarks 10x to 20x faster than pure-Python libraries like PyPDF2, while handling complex multi-column layouts and non-standard fonts reliably without crashing."
 
 > **Transition to Member 3:**  
-> *"Next, my teammate [Member 3 Name] will explain our RAG knowledge base and how context-grounded interview questions are generated."*
+> *"Next, my teammate Vasireddy Vignesh Reddy will explain our RAG knowledge base and how context-grounded interview questions are generated."*
 
 ---
 
 ## MEMBER 3: RAG Knowledge Base & Context-Aware Question Generation
+- **Speaker:** Vasireddy Vignesh Reddy (`24BD1A665X`)
 - **Role:** AI/RAG & Knowledge Engineering Lead
 - **Time Allocated:** 3.5 Minutes (7:00 - 10:30)
 - **Primary Goal:** Explain vector search, why RAG prevents LLM hallucinations, retrieval metrics (Hit@1, MRR), and prompt assembly.
 
 ### 1. What to Tell (Speaking Script)
-> "Thank you [Member 2]. I am [Name], and I will discuss our **Retrieval-Augmented Generation (RAG) Architecture and Question Generation Service**.
+> "Thank you Srujan. I am Vasireddy Vignesh Reddy, and I will discuss our **Retrieval-Augmented Generation (RAG) Architecture and Question Generation Service**.
 >
 > When standard LLMs generate technical interview questions, they often create questions that are overly vague, too trivial, or factually inaccurate. To guarantee technical accuracy, SmartInterview grounds all question generation in a **verified knowledge base**.
 >
@@ -194,17 +202,18 @@
   *Answer:* "MRR evaluates where the first relevant ground-truth document appears in our retrieval results ($MRR = \frac{1}{|Q|} \sum \frac{1}{\text{rank}_i}$). An MRR of 0.9798 means the absolute best matching technical concept was returned as the #1 ranked result in almost 98% of our test queries."
 
 > **Transition to Member 4:**  
-> *"Now, my teammate [Member 4 Name] will explain our Deterministic Adaptive State Machine and how Bloom's Taxonomy governs interview progression."*
+> *"Now, my teammate Aelugu Ranith Kumar will explain our Deterministic Adaptive State Machine and how Bloom's Taxonomy governs interview progression."*
 
 ---
 
 ## MEMBER 4: Deterministic Adaptive Engine & Bloom's Taxonomy State Machine
+- **Speaker:** Aelugu Ranith Kumar (`25BD5A6615`)
 - **Role:** Cognitive Architecture & Adaptive Algorithms Lead
 - **Time Allocated:** 3.5 Minutes (10:30 - 14:00)
 - **Primary Goal:** Explain why the LLM does NOT control progression, detail Bloom's 6 cognitive levels, and demonstrate the 80/50 progression state machine.
 
 ### 1. What to Tell (Speaking Script)
-> "Thank you [Member 3]. I am [Name], and I will present the core pedagogical innovation of SmartInterview: **The Deterministic Adaptive State Machine** based on **Bloom's Taxonomy**.
+> "Thank you Vignesh. I am Aelugu Ranith Kumar, and I will present the core pedagogical innovation of SmartInterview: **The Deterministic Adaptive State Machine** based on **Bloom's Taxonomy**.
 >
 > In many naive AI projects, developers prompt an LLM: *'Here is the user's answer, decide what question to ask next.'* This approach is deeply flawed: LLMs drift, generate erratic jumps in difficulty, and lack consistent evaluation criteria.
 >
@@ -250,17 +259,18 @@
   *Answer:* "Because the `AdaptiveState` is serialized to MySQL after every question turn, the session is completely stateful. When the user reconnects, the backend reloads the exact `LearnerProfile`, current Bloom level, and tested skills from the database."
 
 > **Transition to Member 5:**  
-> *"Now, my teammate [Member 5 Name] will conclude our presentation with our 5-Factor Answer Evaluation, Voice processing, and automated PDF reporting."*
+> *"Now, my teammate Konduri Abhiram will conclude our presentation with our 5-Factor Answer Evaluation, Voice processing, and automated PDF reporting."*
 
 ---
 
 ## MEMBER 5: Multi-Factor Answer Evaluation, Voice Processing & Final Analytics
+- **Speaker:** Konduri Abhiram (`25BD5A6620`)
 - **Role:** Evaluation Systems, Audio Engineering & Analytics Lead
 - **Time Allocated:** 3.5 Minutes (14:00 - 17:30)
 - **Primary Goal:** Detail the 5-factor scoring formula, showcase TTS/STT voice integration, and demonstrate the dynamic PDF report generation.
 
 ### 1. What to Tell (Speaking Script)
-> "Thank you [Member 4]. I am [Name], and I will present our **Multi-Factor Answer Evaluation Service, Voice Pipeline, and Student Performance Analytics**.
+> "Thank you Ranith. I am Konduri Abhiram, and I will present our **Multi-Factor Answer Evaluation Service, Voice Pipeline, and Student Performance Analytics**.
 >
 > In many mock interview platforms, scoring is arbitrary: an LLM is asked for a single number between 1 and 100, which introduces high variance.
 >
