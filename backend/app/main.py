@@ -12,28 +12,75 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import auth, resumes, interviews, users, job_descriptions
+from app.routers.chat import router as chat_router, ws_router as chat_ws_router
 
 app = FastAPI(
     title="SmartInterview API",
     description="AI-powered Technical Mock Interview Platform",
-    version="7.0.0",
+    version="8.0.0",
 )
 
 # CORS — allow React dev server
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5174", "http://127.0.0.1:5174"],
+    allow_origins=[
+        "http://localhost:5173", "http://127.0.0.1:5173",
+        "http://localhost:5174", "http://127.0.0.1:5174",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Register routers
+# Register existing routers
 app.include_router(auth.router)
 app.include_router(resumes.router)
 app.include_router(job_descriptions.router)
 app.include_router(interviews.router)
 app.include_router(users.router)
+
+# Register new chat routers
+app.include_router(chat_router)
+app.include_router(chat_ws_router)
+
+
+# ── Startup: create chat tables if they don't exist ─────────────────────────
+
+@app.on_event("startup")
+async def startup():
+    """
+    Create all new chat tables on startup (non-destructive).
+    Existing tables are untouched.
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+
+    from app.database import engine
+    from app.models.chat import (
+        ChatGroup, ChatGroupMember, ChatMessage,
+        GroupInterviewShare, GroupInterviewAttempt,
+    )
+    from app.database import Base
+
+    # Import all models so Base metadata is fully populated
+    import app.models  # noqa: F401
+
+    try:
+        # checkfirst=True means: only create tables that don't exist
+        Base.metadata.create_all(bind=engine, checkfirst=True)
+        logger.info("Chat tables created/verified successfully.")
+    except Exception as exc:
+        logger.error("Failed to create chat tables: %s", exc)
+
+    # Initialize Redis connection
+    from app.services.redis_service import get_redis
+    await get_redis()
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    from app.services.redis_service import close_redis
+    await close_redis()
 
 
 @app.get("/api/health")

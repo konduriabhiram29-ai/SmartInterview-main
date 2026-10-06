@@ -1,13 +1,15 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useChat } from '../context/ChatContext';
 import {
   LayoutDashboard, FileText, Clock, BarChart3,
-  LogOut, BrainCircuit, Menu, X, User, BookOpen
+  LogOut, BrainCircuit, Menu, X, User, BookOpen, MessageSquare
 } from 'lucide-react';
 import { useState } from 'react';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard',       icon: LayoutDashboard },
+  { to: '/chat',      label: 'Group Chat',      icon: MessageSquare, hasBadge: true },
   { to: '/history',   label: 'Interviews',       icon: Clock },
   { to: '/resume',    label: 'Resume & Skills',  icon: FileText },
   { to: '/syllabus',  label: 'Syllabus & Course',icon: BookOpen },
@@ -17,6 +19,7 @@ const navItems = [
 
 function SidebarContent({ onClose }) {
   const { user, logout } = useAuth();
+  const { totalUnread } = useChat();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -46,7 +49,7 @@ function SidebarContent({ onClose }) {
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-3">
           Main Menu
         </p>
-        {navItems.map(({ to, label, icon: Icon }) => {
+        {navItems.map(({ to, label, icon: Icon, hasBadge }) => {
           const active = location.pathname.startsWith(to);
           return (
             <Link
@@ -56,8 +59,13 @@ function SidebarContent({ onClose }) {
               className={`nav-item no-underline ${active ? 'nav-item-active' : 'nav-item-inactive'}`}
             >
               <Icon size={16} className={active ? 'text-indigo-600' : 'text-slate-400'} />
-              {label}
-              {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500" />}
+              <span>{label}</span>
+              {hasBadge && totalUnread > 0 && (
+                <span className="ml-auto bg-indigo-600 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
+                  {totalUnread > 99 ? '99+' : totalUnread}
+                </span>
+              )}
+              {active && !hasBadge && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500" />}
             </Link>
           );
         })}

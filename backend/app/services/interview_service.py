@@ -448,6 +448,7 @@ def submit_and_evaluate(
                 projects=projects,
                 previous_questions=state.previous_questions,
                 previous_skill=question.skill,
+                weak_topics=state.get_weak_topics(),
             )
 
         next_q_number = state.questions_generated + 1

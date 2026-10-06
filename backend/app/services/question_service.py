@@ -9,6 +9,11 @@ Week 8 additions:
     - generate_single_question(): generates ONE question with Bloom-level guidance
     - Safe Groq model verification (no sys.exit)
     - Exposes singletons for use by evaluation_service.py
+
+Phase 1 (Hybrid Graph RAG):
+    - Retrieval now goes through app.rag.retriever_factory.get_retriever()
+    - RAG_MODE=dense (default) → VectorRetriever, identical to previous behaviour
+    - All return shapes, function signatures, and external contracts are unchanged
 """
 
 import sys
@@ -44,6 +49,10 @@ _chroma_collection = None
 _groq_client = None
 _groq_model = None
 _prompts = None
+
+# ── Retriever & Reranker singletons (Phase 1, 9, 10) ─────
+_retriever = None
+_reranker = None
 
 
 def _init_rag():
@@ -85,6 +94,41 @@ def _get_prompts():
     return _prompts
 
 
+def _get_retriever(mode: str | None = None):
+    """
+    Return the active BaseRetriever singleton.
+    Respects app.config.RAG_MODE (dense, keyword, graph, hybrid).
+    """
+    global _retriever
+    _init_rag()  # ensure embedding model and collection are ready
+    from app.config import RAG_MODE
+    effective_mode = (mode or RAG_MODE or "dense").lower().strip()
+    if _retriever is None or getattr(_retriever, "_mode", None) != effective_mode:
+        with _lock:
+            if _retriever is None or getattr(_retriever, "_mode", None) != effective_mode:
+                from app.rag.retriever_factory import get_retriever
+                _retriever = get_retriever(
+                    embedding_model=_embedding_model,
+                    chroma_collection=_chroma_collection,
+                    build_rag_query_fn=build_rag_query,
+                    mode=effective_mode,
+                )
+                setattr(_retriever, "_mode", effective_mode)
+    return _retriever
+
+
+def _get_reranker():
+    """Return the active BaseReranker singleton (Phase 9 & 10)."""
+    global _reranker
+    _init_rag()
+    if _reranker is None:
+        with _lock:
+            if _reranker is None:
+                from app.rag.reranker import get_reranker
+                _reranker = get_reranker(embedding_model=_embedding_model)
+    return _reranker
+
+
 # ── Singleton Accessors (for evaluation_service) ─────────
 
 def get_embedding_model():
@@ -121,12 +165,15 @@ def generate_single_question(
     projects: list[dict] | None = None,
     previous_questions: list[str] | None = None,
     previous_skill: str | None = None,
+    weak_topics: list[str] | None = None,
+    **kwargs,
 ) -> dict:
     """
-    Generate ONE interview question with optional Bloom-level guidance and conversational continuity.
+    Generate ONE interview question with optional Bloom-level guidance,
+    weak-topic remediation, and conversational continuity.
 
-    This reuses the existing Week 6 pipeline:
-        resolve_skill_domains → retrieve_rag_context → build_prompt → call_groq
+    Adaptive RAG Pipeline:
+        resolve_skill_domains → retrieve (Bloom & weak-topic aware) → rerank → build_prompt → call_groq
 
     Args:
         skill: The technical skill to ask about
@@ -136,10 +183,12 @@ def generate_single_question(
         projects: Candidate's projects for personalization
         previous_questions: Previously asked questions for deduplication
         previous_skill: Previous question's skill for natural conversational continuity
+        weak_topics: Optional list of identified weak topics for prerequisite remediation
 
     Returns:
         Dict with: skill, question_type, difficulty, question_text,
-                    bloom_level, bloom_level_number, rag_context, project_context
+                    bloom_level, bloom_level_number, rag_context, project_context,
+                    rag_retrieval_results, weak_topics
     """
     _init_rag()
     _init_groq()
@@ -147,14 +196,53 @@ def generate_single_question(
 
     projects = projects or []
     previous_questions = previous_questions or []
+    weak_topics = weak_topics or []
 
     # Resolve skill → knowledge-base domains
     skill_domains = resolve_skill_domains(skill)
 
-    # RAG retrieval (domain-filtered) — uses existing function
-    rag_chunks, rag_query = retrieve_rag_context(
-        skill, _embedding_model, _chroma_collection, domains=skill_domains
+    # ── RAG retrieval via retriever abstraction (Phase 1, 6, 7, 8, 10) ──
+    from app.config import RAG_MODE, RERANKER_ENABLED, RERANKER_TOP_K
+    retriever = _get_retriever()
+    rag_query = build_rag_query(skill, skill_domains)
+    bloom_id = bloom_level.id if hasattr(bloom_level, "id") else (str(bloom_level) if bloom_level else None)
+    fetch_k = 10 if RAG_MODE in {"hybrid", "graph"} else 3
+
+    retrieval_results = retriever.retrieve(
+        query=rag_query,
+        skill=skill,
+        domains=skill_domains,
+        top_k=fetch_k,
+        bloom_level=bloom_id,
+        weak_topics=weak_topics,
+        **kwargs,
     )
+
+    # ── Contextual Reranking (Phase 9 & 10) ──
+    if RERANKER_ENABLED and len(retrieval_results) > 1:
+        reranker = _get_reranker()
+        if reranker is not None:
+            retrieval_results = reranker.rerank(
+                query=rag_query,
+                results=retrieval_results,
+                top_k=RERANKER_TOP_K,
+            )
+
+    # Convert RetrievalResult objects back to the legacy dict shape so that
+    # build_prompt() and the rest of this function remain unchanged.
+    rag_chunks = [
+        {
+            "chunk_id": r.chunk_id,
+            "domain": r.domain,
+            "concept": r.concept,
+            "text": r.text,
+            "distance": r.vector_score,
+            "score": r.final_score,
+            "retriever": r.retriever,
+            "metadata": r.metadata,
+        }
+        for r in retrieval_results[:3]
+    ]
 
     # Optional project context — uses existing function
     project_ctx = find_project_for_skill(skill, projects)
@@ -227,8 +315,10 @@ def generate_single_question(
         "rag_context": rag_meta,
         "rag_context_full": rag_context_full,  # kept for evaluation, NOT stored in DB
         "project_context": proj_meta,
-        "bloom_level": bloom_level.id if bloom_level else None,
-        "bloom_level_number": bloom_level.order if bloom_level else None,
+        "bloom_level": bloom_level.id if hasattr(bloom_level, "id") else (str(bloom_level) if bloom_level else None),
+        "bloom_level_number": bloom_level.order if hasattr(bloom_level, "order") else None,
+        "rag_retrieval_results": [r.to_dict() for r in retrieval_results[:3]],
+        "weak_topics": weak_topics or [],
     }
 
     return result
@@ -287,10 +377,25 @@ def generate_questions(
         # Resolve skill → knowledge-base domains
         skill_domains = resolve_skill_domains(skill)
 
-        # RAG retrieval (domain-filtered) — uses existing function
-        rag_chunks, rag_query = retrieve_rag_context(
-            skill, _embedding_model, _chroma_collection, domains=skill_domains
+        # ── RAG retrieval via retriever abstraction (Phase 1) ──
+        retriever = _get_retriever()
+        rag_query = build_rag_query(skill, skill_domains)
+        retrieval_results = retriever.retrieve(
+            query=rag_query,
+            skill=skill,
+            domains=skill_domains,
+            top_k=3,
         )
+        rag_chunks = [
+            {
+                "chunk_id": r.chunk_id,
+                "domain": r.domain,
+                "concept": r.concept,
+                "text": r.text,
+                "distance": r.vector_score,
+            }
+            for r in retrieval_results
+        ]
 
         # Optional project context — uses existing function
         project_ctx = find_project_for_skill(skill, projects)

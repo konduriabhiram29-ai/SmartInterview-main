@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { BarChart3, Brain, Target, CheckCircle, ArrowLeft, Lightbulb, Loader2, AlertCircle, ChevronDown, ChevronUp, Download } from 'lucide-react';
+import { BarChart3, Brain, Target, CheckCircle, ArrowLeft, Lightbulb, Loader2, AlertCircle, ChevronDown, ChevronUp, Download, MessageSquare } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import api from '../services/api';
@@ -127,6 +127,13 @@ export default function Results() {
             >
               {downloadingPdf ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
               {downloadingPdf ? 'Generating PDF...' : 'Download Full Report'}
+            </button>
+            <button
+              onClick={() => navigate('/chat')}
+              className="btn btn-secondary w-full py-2 text-xs flex items-center justify-center gap-1.5"
+            >
+              <MessageSquare size={14} />
+              Discuss in Group Chat
             </button>
           </div>
         )}

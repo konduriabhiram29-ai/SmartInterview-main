@@ -133,6 +133,18 @@ class AdaptiveState:
         """Persist a SkillPerformance back into the state."""
         self.skill_performances[perf.skill] = perf.to_dict()
 
+    def get_weak_topics(self, threshold: float = 60.0) -> list[str]:
+        """
+        Return list of skills where the candidate has scored below the threshold,
+        signaling that foundation/prerequisite remediation should be triggered.
+        """
+        weak = []
+        for skill_name, data in self.skill_performances.items():
+            perf = SkillPerformance.from_dict(data) if isinstance(data, dict) else data
+            if perf.attempts > 0 and perf.average_score < threshold:
+                weak.append(skill_name)
+        return weak
+
     def serialize(self) -> dict:
         """Serialize state to JSON-safe dict for MySQL storage."""
         return {

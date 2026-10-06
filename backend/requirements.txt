@@ -14,3 +14,8 @@ chromadb==0.6.3
 pymupdf
 edge-tts
 reportlab
+redis[asyncio]>=5.0.0
+websockets>=12.0
+neo4j>=5.0.0
+networkx>=3.0
+rank-bm25>=0.2.2

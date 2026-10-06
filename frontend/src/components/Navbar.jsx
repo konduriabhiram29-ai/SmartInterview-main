@@ -1,10 +1,12 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, FileText, Clock, User, LogOut, Menu, X, BrainCircuit, BarChart3 } from 'lucide-react';
+import { useChat } from '../context/ChatContext';
+import { LayoutDashboard, FileText, Clock, User, LogOut, Menu, X, BrainCircuit, BarChart3, MessageSquare } from 'lucide-react';
 import { useState } from 'react';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/chat', label: 'Group Chat', icon: MessageSquare },
   { to: '/resume', label: 'Resume', icon: FileText },
   { to: '/history', label: 'History', icon: Clock },
   { to: '/performance', label: 'Performance', icon: BarChart3 },
@@ -12,6 +14,7 @@ const navItems = [
 
 export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
+  const { totalUnread } = useChat();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -54,8 +57,22 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* User Menu */}
+          {/* User Menu & Chat Icon */}
           <div className="hidden md:flex items-center gap-4 border-l border-slate-200 pl-4">
+            {/* Top-Right Chat Icon with Unread Badge */}
+            <Link
+              to="/chat"
+              title="Group Chat"
+              className="relative p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-xl transition-colors no-underline flex items-center justify-center cursor-pointer"
+            >
+              <MessageSquare size={20} />
+              {totalUnread > 0 && (
+                <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-[10px] font-bold rounded-full px-1.5 py-0.2 min-w-[18px] text-center shadow-xs">
+                  {totalUnread > 99 ? '99+' : totalUnread}
+                </span>
+              )}
+            </Link>
+
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">
                 {user?.name?.charAt(0).toUpperCase() || 'U'}

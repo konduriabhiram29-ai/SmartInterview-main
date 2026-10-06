@@ -33,6 +33,9 @@ scratch/
 backend/scratch/
 backend/generate_pdf.py
 backend/get_samples.py
+rag_full_prompt.md
+rag_prompt.txt
+scratch_prompt.txt
 
 # ChromaDB temporary/generated files
 # Keep chroma_db only if you intentionally want to upload the
