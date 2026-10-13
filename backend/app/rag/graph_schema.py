@@ -255,6 +255,8 @@ class GraphEdge:
     derivation: DerivationStrategy
     evidence: str = ""        # text quote or rule description that supports this edge
     confidence: float = 1.0   # 0.0–1.0; 1.0 = certain, 0.7 = LLM medium
+    source_chunk_id: Optional[str] = None  # Specific source chunk ID supporting edge if applicable
+    validation_status: str = "VALIDATED"   # Validation status: VALIDATED | PENDING | REJECTED
 
 
 # ── Domain Catalogue (all 8 canonical domains) ────────────────────────

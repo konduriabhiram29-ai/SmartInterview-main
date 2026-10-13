@@ -385,3 +385,79 @@ class TestQuestionServiceInterface:
             assert key in legacy_dict, f"Missing legacy key: {key}"
 
         assert legacy_dict["distance"] == 0.18
+
+
+# ---------------------------------------------------------------------------
+# 6. Dense Baseline Isolation Regression Tests
+# ---------------------------------------------------------------------------
+
+class TestDenseBaselineIsolation:
+    """
+    Verify that Dense RAG mode is strictly isolated from:
+      1. BM25 keyword retriever
+      2. Graph store and traversal
+      3. Hybrid fusion algorithms
+      4. Contextual reranking
+    """
+
+    def test_vector_retriever_only_calls_embedding_and_chroma(self):
+        """VectorRetriever must not touch keyword, graph, or reranker modules."""
+        from unittest.mock import MagicMock
+        from app.rag.vector_retriever import VectorRetriever
+        import numpy as np
+
+        mock_em = MagicMock()
+        mock_em.encode.return_value = np.array([0.1] * 384)
+        mock_col = MagicMock()
+        mock_col.query.return_value = {
+            "ids": [["c1"]],
+            "documents": [["text"]],
+            "metadatas": [[{"domain": "dbms", "concept": "indexing"}]],
+            "distances": [[0.15]],
+        }
+
+        retriever = VectorRetriever(
+            embedding_model=mock_em,
+            collection=mock_col,
+            build_rag_query_fn=lambda s, d: "query",
+        )
+
+        res = retriever.retrieve(query="indexing", skill="SQL", domains=["dbms"], top_k=3)
+        assert len(res) == 1
+        assert res[0].retriever == "vector"
+        assert res[0].vector_score == 0.15
+        assert res[0].keyword_score is None
+        assert res[0].graph_score is None
+        mock_em.encode.assert_called_once()
+        mock_col.query.assert_called_once()
+
+    def test_generate_single_question_dense_bypasses_reranker(self, monkeypatch):
+        """In Dense mode, generate_single_question must never invoke reranker even if RERANKER_ENABLED=True."""
+        from unittest.mock import MagicMock
+        import app.services.question_service as qs
+        import app.config as config
+        from app.rag.retrieval_result import RetrievalResult
+
+        mock_reranker = MagicMock()
+        monkeypatch.setattr(config, "RERANKER_ENABLED", True)
+        monkeypatch.setattr(qs, "_get_reranker", lambda: mock_reranker)
+        monkeypatch.setattr(qs, "call_groq", lambda s, u, c, m: "Sample question?")
+
+        mock_retriever = MagicMock()
+        mock_retriever.retrieve.return_value = [
+            RetrievalResult(chunk_id="c1", text="t1", domain="dbms", concept="indexing", vector_score=0.1, final_score=0.1, retriever="vector"),
+            RetrievalResult(chunk_id="c2", text="t2", domain="dbms", concept="indexing", vector_score=0.2, final_score=0.2, retriever="vector"),
+        ]
+        monkeypatch.setattr(qs, "_get_retriever", lambda mode=None: mock_retriever)
+
+        # Call in dense mode explicitly
+        q = qs.generate_single_question(
+            skill="SQL",
+            difficulty="medium",
+            question_type="conceptual",
+            rag_mode="dense",
+        )
+
+        assert q["question_text"] == "Sample question?"
+        # The reranker must NOT be called in dense mode!
+        mock_reranker.rerank.assert_not_called()

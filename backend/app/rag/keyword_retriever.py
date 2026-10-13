@@ -28,10 +28,20 @@ logger = logging.getLogger(__name__)
 def _tokenize_text(text: str) -> List[str]:
     """
     Tokenize text into lower-case terms while splitting snake_case and kebab-case.
-    e.g. 'linear-regression' -> ['linear', 'regression']
+    Preserves technical programming terms and acronyms (e.g. 'b+', 'c++').
     """
-    cleaned = text.lower().replace("-", " ").replace("_", " ")
-    return re.findall(r"[a-z0-9]+", cleaned)
+    if not text or not isinstance(text, str):
+        return []
+    cleaned = text.lower().replace("-", " ").replace("_", " ").replace("/", " ")
+    raw_tokens = re.findall(r"[a-z0-9][a-z0-9+#]*", cleaned)
+    tokens: List[str] = []
+    for t in raw_tokens:
+        tokens.append(t)
+        if "+" in t or "#" in t:
+            stripped = re.sub(r"[+#]", "", t)
+            if stripped:
+                tokens.append(stripped)
+    return tokens
 
 
 class KeywordRetriever(BaseRetriever):
@@ -70,32 +80,26 @@ class KeywordRetriever(BaseRetriever):
             logger.info("[KeywordRetriever] Indexed %d knowledge chunks.", len(self._chunks))
 
     def _load_from_storage(self) -> None:
-        """Load chunks from graph_data.json or processed directory."""
-        # Try graph_data.json first
-        gpath = _output_path()
-        if os.path.exists(gpath):
-            try:
-                with open(gpath, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                chunk_nodes = [
-                    {
-                        "id": n["id"],
-                        "domain": n.get("properties", {}).get("domain_id", ""),
-                        "concept": n.get("properties", {}).get("concept_id", ""),
-                        "text": n.get("properties", {}).get("text", ""),
-                        "source": n.get("properties", {}).get("source", "knowledge_base"),
-                        "source_url": n.get("properties", {}).get("source_url", ""),
-                    }
-                    for n in data.get("nodes", [])
-                    if n.get("type") == "KnowledgeChunk"
-                ]
-                if chunk_nodes:
-                    self._load_chunks_data(chunk_nodes)
-                    return
-            except Exception as e:
-                logger.warning("[KeywordRetriever] Could not load from graph_data.json: %s", e)
+        """Load full canonical chunks using CanonicalChunkResolver."""
+        from app.rag.canonical_resolver import get_canonical_resolver
+        resolver = get_canonical_resolver()
+        canonical_chunks = resolver.get_all_chunks()
+        if canonical_chunks:
+            chunk_nodes = [
+                {
+                    "id": c.chunk_id,
+                    "domain": c.domain,
+                    "concept": c.concept,
+                    "text": c.text,
+                    "source": c.source,
+                    "source_url": c.source_url,
+                }
+                for c in canonical_chunks
+            ]
+            self._load_chunks_data(chunk_nodes)
+            return
 
-        # Fallback to data/processed
+        # Fallback to data/processed if resolver had no items
         proc_dir = _processed_dir()
         loaded = []
         if os.path.isdir(proc_dir):
@@ -136,6 +140,16 @@ class KeywordRetriever(BaseRetriever):
         domains : List of domain strings to filter by (e.g. ['dbms'])
         top_k   : Number of chunks to retrieve
         """
+        import time
+        start_time = time.perf_counter()
+
+        if query is None or not isinstance(query, str) or not query.strip():
+            logger.debug("[KeywordRetriever] Empty or non-string query; returning empty.")
+            return []
+
+        if top_k <= 0:
+            return []
+
         if not self._bm25_global or not self._chunks:
             logger.warning("[KeywordRetriever] Empty corpus or index; returning empty.")
             return []
@@ -144,11 +158,12 @@ class KeywordRetriever(BaseRetriever):
         if not query_tokens:
             return []
 
-        # Determine target chunk indices based on domain filter
+        # Determine target chunk indices based on domain filter (case-insensitive & stripped)
         if domains:
             allowed_indices = set()
             for did in domains:
-                allowed_indices.update(self._domain_chunk_indices.get(did, []))
+                if isinstance(did, str):
+                    allowed_indices.update(self._domain_chunk_indices.get(did.lower().strip(), []))
         else:
             allowed_indices = set(range(len(self._chunks)))
 
@@ -177,13 +192,23 @@ class KeywordRetriever(BaseRetriever):
         if max_score <= 0.0:
             max_score = 1.0
 
+        elapsed_ms = round((time.perf_counter() - start_time) * 1000, 2)
+        self._last_latency_ms = elapsed_ms
+
         results: List[RetrievalResult] = []
-        for raw_score, idx, matched_terms in scored_candidates[:top_k]:
+        seen_chunk_ids: Set[str] = set()
+
+        for raw_score, idx, matched_terms in scored_candidates:
             chunk = self._chunks[idx]
+            cid = chunk["id"]
+            if cid in seen_chunk_ids:
+                continue
+            seen_chunk_ids.add(cid)
+
             norm_score = round(raw_score / max_score, 4)
 
             res = RetrievalResult(
-                chunk_id=chunk["id"],
+                chunk_id=cid,
                 text=chunk.get("text", ""),
                 domain=chunk.get("domain", ""),
                 concept=chunk.get("concept", ""),
@@ -198,9 +223,15 @@ class KeywordRetriever(BaseRetriever):
                     "bm25_raw_score": round(raw_score, 4),
                     "matched_terms": matched_terms,
                     "matched_term_count": len(matched_terms),
+                    "latency_ms": elapsed_ms,
+                    "is_full_text": True,
+                    "canonical_resolved": True,
+                    "char_count": len(chunk.get("text", "")),
                 },
             )
             results.append(res)
+            if len(results) >= top_k:
+                break
 
         return results
 
@@ -210,4 +241,5 @@ class KeywordRetriever(BaseRetriever):
             "total_chunks": len(self._chunks),
             "domains_indexed": sorted(list(self._domain_chunk_indices.keys())),
             "vocab_terms": len(self._bm25_global.idf) if self._bm25_global else 0,
+            "last_latency_ms": getattr(self, "_last_latency_ms", None),
         }

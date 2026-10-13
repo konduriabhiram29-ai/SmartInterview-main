@@ -467,6 +467,35 @@ def check_prerequisite_acyclicity(edges: List[dict]) -> Tuple[bool, List[Validat
     return not cycle_detected, issues
 
 
+def check_contradictory_edges(edges: List[dict]) -> Tuple[List[dict], List[ValidationIssue]]:
+    """
+    Verify that no contradictory relationships exist:
+      1. Mutual reciprocal prerequisite contradiction: A PREREQUISITE_OF B AND B PREREQUISITE_OF A.
+      2. Bidirectional prerequisite cycles of length 2.
+    """
+    issues = []
+    invalid = []
+    prereqs = set()
+
+    for e in edges:
+        rel = e.get("relation")
+        src = e.get("source_id")
+        tgt = e.get("target_id")
+
+        if rel == "PREREQUISITE_OF":
+            if (tgt, src) in prereqs:
+                invalid.append(e)
+                issues.append(ValidationIssue(
+                    severity="ERROR",
+                    check="contradictory_edges",
+                    message=f"Contradictory reciprocal prerequisite detected between '{src}' and '{tgt}'",
+                    context={"source_id": src, "target_id": tgt, "relation": rel},
+                ))
+            prereqs.add((src, tgt))
+
+    return invalid, issues
+
+
 # ── Primary Validation Entry Point ────────────────────────────────────
 
 def validate_graph(graph_data: dict) -> ValidationReport:
@@ -527,6 +556,11 @@ def validate_graph(graph_data: dict) -> ValidationReport:
     # 11. Prerequisite acyclicity
     is_acyclic, cycle_issues = check_prerequisite_acyclicity(raw_edges)
     all_issues.extend(cycle_issues)
+
+    # 12. Contradictory edges
+    contradictory_edges, contradiction_issues = check_contradictory_edges(raw_edges)
+    all_issues.extend(contradiction_issues)
+    invalid_edges_accum.extend(contradictory_edges)
 
     error_count = sum(1 for i in all_issues if i.severity == "ERROR")
     is_valid = (error_count == 0)

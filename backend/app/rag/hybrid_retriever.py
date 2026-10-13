@@ -25,6 +25,7 @@ per-component scores, source lists, and explainability metadata.
 
 from __future__ import annotations
 
+import time
 import logging
 from typing import List, Optional, Dict, Set, Tuple, Any
 
@@ -210,6 +211,19 @@ class HybridRetriever(BaseRetriever):
         -------
         List[RetrievalResult] ordered by final_score descending.
         """
+        start_time = time.perf_counter()
+
+        if top_k <= 0:
+            return []
+
+        # Sanitize query and domain filters
+        query_str = "" if query is None else (query if isinstance(query, str) else str(query))
+        domains_clean = (
+            [d.lower().strip() for d in domains if d and isinstance(d, str)]
+            if domains
+            else None
+        )
+
         effective_fusion = (kwargs.get("fusion_method") or self.fusion_method).lower().strip()
         effective_fetch_k = kwargs.get("fetch_k", max(top_k * 3, self.fetch_k))
         norm_mode = kwargs.get("norm_mode", "max")
@@ -225,9 +239,9 @@ class HybridRetriever(BaseRetriever):
         if self.vector_retriever is not None:
             try:
                 vector_candidates = self.vector_retriever.retrieve(
-                    query=query,
+                    query=query_str,
                     skill=skill,
-                    domains=domains,
+                    domains=domains_clean,
                     top_k=effective_fetch_k,
                     **kwargs,
                 )
@@ -238,9 +252,9 @@ class HybridRetriever(BaseRetriever):
         if self.keyword_retriever is not None:
             try:
                 keyword_candidates = self.keyword_retriever.retrieve(
-                    query=query,
+                    query=query_str,
                     skill=skill,
-                    domains=domains,
+                    domains=domains_clean,
                     top_k=effective_fetch_k,
                     **kwargs,
                 )
@@ -251,9 +265,9 @@ class HybridRetriever(BaseRetriever):
         if self.graph_retriever is not None:
             try:
                 graph_candidates = self.graph_retriever.retrieve(
-                    query=query,
+                    query=query_str,
                     skill=skill,
-                    domains=domains,
+                    domains=domains_clean,
                     top_k=effective_fetch_k,
                     **kwargs,
                 )
@@ -292,8 +306,20 @@ class HybridRetriever(BaseRetriever):
             sources_map.setdefault(cid, set()).add("graph")
             ranks_map.setdefault(cid, {})["graph"] = rank_idx
             raw_scores_map.setdefault(cid, {})["graph"] = res.graph_score
-            if "graph_traversal" in res.metadata:
-                extra_meta.setdefault(cid, {})["graph_traversal"] = res.metadata["graph_traversal"]
+
+            # Retain critical graph provenance across deduplication
+            for g_key in (
+                "traversal_path",
+                "role",
+                "remediation",
+                "confidence",
+                "bloom_level",
+                "evidence",
+                "graph_traversal",
+                "concept_id",
+            ):
+                if g_key in res.metadata:
+                    extra_meta.setdefault(cid, {})[g_key] = res.metadata[g_key]
 
         if not chunk_pool:
             logger.info("[HybridRetriever] No candidates returned from any retriever.")
@@ -397,16 +423,23 @@ class HybridRetriever(BaseRetriever):
             )
             final_results.append(res)
 
-        # 5. Sort by final_score descending
+        # 5. Sort by final_score descending and ensure canonical full-text resolution
         final_results.sort(key=lambda r: r.final_score, reverse=True)
+        from app.rag.canonical_resolver import get_canonical_resolver
+        final_results = get_canonical_resolver().resolve_results(final_results)
+
+        elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+        for r in final_results:
+            r.metadata["latency_ms"] = round(elapsed_ms, 2)
 
         logger.info(
-            "[HybridRetriever] Query='%s' Skill='%s': fused %d unique candidates across [%s] using '%s' fusion. Returning top %d.",
-            query[:40],
+            "[HybridRetriever] Query='%s' Skill='%s': fused %d unique candidates across [%s] using '%s' fusion (%.2fms). Returning top %d.",
+            query_str[:40],
             skill,
             len(chunk_pool),
             ", ".join(active_retrievers.keys()),
             effective_fusion,
+            elapsed_ms,
             min(top_k, len(final_results)),
         )
 

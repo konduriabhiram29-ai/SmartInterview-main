@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import re
 import math
+import time
 import logging
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple, Dict, Any
@@ -45,6 +46,8 @@ logger = logging.getLogger(__name__)
 
 def _tokenize(text: str) -> set[str]:
     """Extract lowercase alphanumeric tokens."""
+    if not text or not isinstance(text, str):
+        return set()
     return set(re.findall(r"[a-z0-9]+", text.lower()))
 
 
@@ -100,6 +103,11 @@ class BaseReranker(ABC):
         """
         pass
 
+    @abstractmethod
+    def get_stats(self) -> Dict[str, Any]:
+        """Return configuration and operational statistics."""
+        pass
+
     @property
     def name(self) -> str:
         """Human-readable class name."""
@@ -114,6 +122,9 @@ class PassThroughReranker(BaseReranker):
     Preserves original ranking, slicing to top_k.
     """
 
+    def get_stats(self) -> Dict[str, Any]:
+        return {"reranker": self.name, "backend": "passthrough"}
+
     def rerank(
         self,
         query: str,
@@ -122,13 +133,16 @@ class PassThroughReranker(BaseReranker):
         threshold: Optional[float] = None,
         **kwargs,
     ) -> List[RetrievalResult]:
-        if not results:
+        start_time = time.perf_counter()
+        if top_k <= 0 or not results:
             return []
         out = results[:top_k]
+        elapsed_ms = (time.perf_counter() - start_time) * 1000.0
         for idx, res in enumerate(out, 1):
             res.metadata["original_rank"] = idx
             res.metadata["rerank_rank"] = idx
             res.metadata["reranker"] = self.name
+            res.metadata["rerank_latency_ms"] = round(elapsed_ms, 2)
         return out
 
 
@@ -151,6 +165,14 @@ class SemanticEmbeddingReranker(BaseReranker):
         self.default_threshold = default_threshold
         self.term_overlap_weight = term_overlap_weight
 
+    def get_stats(self) -> Dict[str, Any]:
+        return {
+            "reranker": self.name,
+            "backend": "semantic",
+            "default_threshold": self.default_threshold,
+            "term_overlap_weight": self.term_overlap_weight,
+        }
+
     def _get_model(self):
         if self._embedding_model is None:
             try:
@@ -159,6 +181,7 @@ class SemanticEmbeddingReranker(BaseReranker):
             except Exception:
                 from sentence_transformers import SentenceTransformer
                 self._embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+            return self._embedding_model
         return self._embedding_model
 
     def rerank(
@@ -169,21 +192,23 @@ class SemanticEmbeddingReranker(BaseReranker):
         threshold: Optional[float] = None,
         **kwargs,
     ) -> List[RetrievalResult]:
-        if not results:
+        start_time = time.perf_counter()
+        if top_k <= 0 or not results:
             return []
 
+        query_str = "" if query is None else (query if isinstance(query, str) else str(query))
         min_score = threshold if threshold is not None else self.default_threshold
         model = self._get_model()
 
         # Encode query and all chunk texts
-        q_vec = model.encode([query])[0]
+        q_vec = model.encode([query_str])[0]
         chunk_texts = [r.text for r in results]
         c_vecs = model.encode(chunk_texts)
 
         scored: List[Tuple[float, int, RetrievalResult]] = []
         for orig_idx, (r, c_vec) in enumerate(zip(results, c_vecs), 1):
             cos_sim = max(0.0, _cosine_similarity(q_vec, c_vec))
-            overlap = _term_overlap_ratio(query, r.text)
+            overlap = _term_overlap_ratio(query_str, r.text)
             # Composite rerank score in [0.0, 1.0]
             composite = (1.0 - self.term_overlap_weight) * cos_sim + self.term_overlap_weight * overlap
             scored.append((composite, orig_idx, r))
@@ -222,6 +247,7 @@ class SemanticEmbeddingReranker(BaseReranker):
                 if len(selected_items) >= top_k:
                     break
 
+        elapsed_ms = (time.perf_counter() - start_time) * 1000.0
         final_candidates: List[RetrievalResult] = []
         for rank_idx, (score, orig_idx, candidate) in enumerate(selected_items[:top_k], 1):
             candidate.final_score = round(score, 6)
@@ -229,6 +255,7 @@ class SemanticEmbeddingReranker(BaseReranker):
             candidate.metadata["original_rank"] = orig_idx
             candidate.metadata["rerank_rank"] = rank_idx
             candidate.metadata["reranker"] = self.name
+            candidate.metadata["rerank_latency_ms"] = round(elapsed_ms, 2)
             final_candidates.append(candidate)
 
         return final_candidates
@@ -252,6 +279,14 @@ class CrossEncoderReranker(BaseReranker):
         self._cross_encoder = cross_encoder
         self.default_threshold = default_threshold
 
+    def get_stats(self) -> Dict[str, Any]:
+        return {
+            "reranker": self.name,
+            "backend": "cross_encoder",
+            "model_name": self.model_name,
+            "default_threshold": self.default_threshold,
+        }
+
     def _get_model(self):
         if self._cross_encoder is None:
             from sentence_transformers import CrossEncoder
@@ -266,14 +301,25 @@ class CrossEncoderReranker(BaseReranker):
         threshold: Optional[float] = None,
         **kwargs,
     ) -> List[RetrievalResult]:
-        if not results:
+        start_time = time.perf_counter()
+        if top_k <= 0 or not results:
             return []
 
+        query_str = "" if query is None else (query if isinstance(query, str) else str(query))
         min_score = threshold if threshold is not None else self.default_threshold
-        encoder = self._get_model()
+        try:
+            encoder = self._get_model()
+        except Exception as exc:
+            logger.warning(
+                "[CrossEncoderReranker] Failed to load model %s (%s). Falling back to SemanticEmbeddingReranker.",
+                self.model_name,
+                exc,
+            )
+            fallback = SemanticEmbeddingReranker(default_threshold=min_score)
+            return fallback.rerank(query, results, top_k=top_k, threshold=threshold, **kwargs)
 
         # Build cross-attention pairs: (query, candidate_text)
-        pairs = [[query, r.text] for r in results]
+        pairs = [[query_str, r.text] for r in results]
         raw_scores = encoder.predict(pairs)
 
         # CrossEncoder logits can be any real number; apply sigmoid for [0, 1] probability
@@ -291,6 +337,7 @@ class CrossEncoderReranker(BaseReranker):
         if not passed and scored:
             passed = [scored[0]]
 
+        elapsed_ms = (time.perf_counter() - start_time) * 1000.0
         final_candidates: List[RetrievalResult] = []
         for rank_idx, (score, orig_idx, candidate) in enumerate(passed[:top_k], 1):
             candidate.final_score = round(score, 6)
@@ -298,6 +345,7 @@ class CrossEncoderReranker(BaseReranker):
             candidate.metadata["original_rank"] = orig_idx
             candidate.metadata["rerank_rank"] = rank_idx
             candidate.metadata["reranker"] = self.name
+            candidate.metadata["rerank_latency_ms"] = round(elapsed_ms, 2)
             final_candidates.append(candidate)
 
         return final_candidates

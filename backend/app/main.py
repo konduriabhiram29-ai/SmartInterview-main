@@ -76,6 +76,20 @@ async def startup():
     from app.services.redis_service import get_redis
     await get_redis()
 
+    # Verify knowledge graph initialization (guarantees readiness before requests)
+    try:
+        from app.rag.graph_store import ensure_graph_initialized
+        g_store = ensure_graph_initialized()
+        stats = g_store.get_stats()
+        logger.info(
+            "Knowledge graph store ready: backend=%s, nodes=%d, edges=%d",
+            stats.get("backend"),
+            stats.get("total_nodes", 0),
+            stats.get("total_edges", 0),
+        )
+    except Exception as exc:
+        logger.warning("Knowledge graph store startup verification warning: %s", exc)
+
 
 @app.on_event("shutdown")
 async def shutdown():

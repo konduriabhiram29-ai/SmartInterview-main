@@ -88,9 +88,14 @@ class GraphEdgeRecord:
     derivation: str    # metadata | structural | llm
     evidence: str      # text quote or rule description
     confidence: float  # 1.0=certain, 0.85=structural, 0.75=llm-confirmed
+    source_chunk_id: Optional[str] = None
+    validation_status: str = "VALIDATED"
 
     def to_dict(self) -> dict:
-        return asdict(self)
+        d = asdict(self)
+        if self.source_chunk_id is None:
+            d.pop("source_chunk_id", None)
+        return d
 
 
 @dataclass
@@ -769,14 +774,20 @@ def deduplicate_edges(edges: List[GraphEdgeRecord]) -> List[GraphEdgeRecord]:
 
 # ── Main build function ───────────────────────────────────────────────────────
 
-def build_graph(dry_run: bool = False, output_path: Optional[str] = None) -> dict:
+def build_graph(
+    dry_run: bool = False,
+    output_path: Optional[str] = None,
+    allow_overwrite: bool = True,
+) -> dict:
     """
     Run the complete graph construction pipeline.
 
     Parameters
     ----------
-    dry_run     : If True, skip Stage C (no LLM calls). Stages A+B only.
-    output_path : Override the default output path (data/graph_data.json).
+    dry_run         : If True, skip Stage C (no LLM calls). Stages A+B only.
+    output_path     : Override the default output path (data/graph_data.json).
+    allow_overwrite : If False and output_path exists, raises FileExistsError.
+                      If True and output_path exists, creates a .bak backup first.
 
     Returns
     -------
@@ -873,6 +884,19 @@ def build_graph(dry_run: bool = False, output_path: Optional[str] = None) -> dic
 
     # ── Write output ──
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    if os.path.exists(out_path):
+        if not allow_overwrite:
+            raise FileExistsError(
+                f"Knowledge graph file already exists at {out_path} and allow_overwrite=False."
+            )
+        import shutil
+        backup_path = f"{out_path}.bak"
+        try:
+            shutil.copy2(out_path, backup_path)
+            logger.info("[GraphBuilder] Existing graph data preserved; backup saved to %s", backup_path)
+        except Exception as e:
+            logger.warning("[GraphBuilder] Could not create backup at %s: %s", backup_path, e)
+
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(graph_data, f, indent=2, ensure_ascii=False)
 

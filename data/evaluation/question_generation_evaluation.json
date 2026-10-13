@@ -1,0 +1,258 @@
+{
+  "metadata": {
+    "title": "SmartInterview Qualitative Question Generation Evaluation",
+    "timestamp": "2026-10-13T15:21:03.434789+00:00",
+    "total_scenarios": 8,
+    "bloom_levels_covered": [
+      "Remember",
+      "Understand",
+      "Apply",
+      "Analyze",
+      "Evaluate",
+      "Create"
+    ],
+    "domains_covered": 8
+  },
+  "aggregate_comparison": {
+    "grounding_score": {
+      "dense": 42.03,
+      "hybrid": 42.01,
+      "delta": -0.03
+    },
+    "bloom_alignment_score": {
+      "dense": 95.0,
+      "hybrid": 100.0,
+      "delta": 5.0
+    },
+    "transition_naturalness": {
+      "dense": 95.0,
+      "hybrid": 95.0,
+      "delta": 0.0
+    },
+    "prerequisite_context_enrichment_rate": 62.5,
+    "generation_latency_ms": {
+      "dense_mean": 7743.6,
+      "hybrid_mean": 7089.72
+    }
+  },
+  "scenarios": [
+    {
+      "scenario_id": "SCEN_01",
+      "domain": "cn",
+      "skill": "dns",
+      "bloom_level": "Remember",
+      "difficulty": "easy",
+      "weak_topics": [],
+      "dense_generation": {
+        "question_text": "What is a PTR record in DNS, and what purpose does it serve?",
+        "latency_ms": 15436.96,
+        "grounding_score": 0.75,
+        "bloom_alignment_score": 1.0,
+        "transition_score": 0.8,
+        "chunks_used": 3
+      },
+      "hybrid_generation": {
+        "question_text": "What is a PTR record used for in DNS, and what does it map?",
+        "latency_ms": 5651.75,
+        "grounding_score": 0.5556,
+        "bloom_alignment_score": 1.0,
+        "transition_score": 0.8,
+        "chunks_used": 3,
+        "has_prereq_context": false,
+        "prerequisite_reflected": false
+      }
+    },
+    {
+      "scenario_id": "SCEN_02",
+      "domain": "cn",
+      "skill": "http-vs-https",
+      "bloom_level": "Understand",
+      "difficulty": "medium",
+      "weak_topics": [],
+      "dense_generation": {
+        "question_text": "Now let's look at http\u2011vs\u2011https: can you explain how HTTPS ensures server authenticity compared to plain HTTP?",
+        "latency_ms": 1045.49,
+        "grounding_score": 0.5,
+        "bloom_alignment_score": 1.0,
+        "transition_score": 1.0,
+        "chunks_used": 3
+      },
+      "hybrid_generation": {
+        "question_text": "Now let's look at HTTP vs. HTTPS: can you explain how the TLS handshake contributes to the security differences between the two protocols?",
+        "latency_ms": 1787.41,
+        "grounding_score": 0.6111,
+        "bloom_alignment_score": 1.0,
+        "transition_score": 1.0,
+        "chunks_used": 3,
+        "has_prereq_context": false,
+        "prerequisite_reflected": false
+      }
+    },
+    {
+      "scenario_id": "SCEN_03",
+      "domain": "dbms",
+      "skill": "keys",
+      "bloom_level": "Apply",
+      "difficulty": "medium",
+      "weak_topics": [
+        "normalization"
+      ],
+      "dense_generation": {
+        "question_text": "Building on that, would you choose email or a surrogate integer as the primary key for a Users table, and what are the trade\u2011offs?",
+        "latency_ms": 946.77,
+        "grounding_score": 0.5263,
+        "bloom_alignment_score": 1.0,
+        "transition_score": 1.0,
+        "chunks_used": 3
+      },
+      "hybrid_generation": {
+        "question_text": "Building on that, which would you choose\u2014composite key or surrogate key for a junction table linking students and courses, and why?",
+        "latency_ms": 1474.7,
+        "grounding_score": 0.5294,
+        "bloom_alignment_score": 1.0,
+        "transition_score": 1.0,
+        "chunks_used": 3,
+        "has_prereq_context": true,
+        "prerequisite_reflected": false
+      }
+    },
+    {
+      "scenario_id": "SCEN_04",
+      "domain": "dbms",
+      "skill": "acid-properties",
+      "bloom_level": "Analyze",
+      "difficulty": "hard",
+      "weak_topics": [
+        "transactions"
+      ],
+      "dense_generation": {
+        "question_text": "Now let's look at acid-properties: How would you decide between using serializable isolation versus snapshot isolation for a high\u2011throughput financial application, and what impact does each have on consistency and performance?",
+        "latency_ms": 1355.08,
+        "grounding_score": 0.3571,
+        "bloom_alignment_score": 0.6,
+        "transition_score": 1.0,
+        "chunks_used": 3
+      },
+      "hybrid_generation": {
+        "question_text": "Let's shift our focus to ACID properties: compare using a two\u2011phase commit versus a saga pattern for ensuring atomicity across microservices, and explain which approach better preserves consistency under network partitions?",
+        "latency_ms": 6752.8,
+        "grounding_score": 0.1724,
+        "bloom_alignment_score": 1.0,
+        "transition_score": 1.0,
+        "chunks_used": 3,
+        "has_prereq_context": true,
+        "prerequisite_reflected": false
+      }
+    },
+    {
+      "scenario_id": "SCEN_05",
+      "domain": "design-patterns",
+      "skill": "singleton",
+      "bloom_level": "Evaluate",
+      "difficulty": "hard",
+      "weak_topics": [
+        "multithreading"
+      ],
+      "dense_generation": {
+        "question_text": "Now let's look at singleton: Evaluate the trade\u2011offs of using a lazy\u2011initialized, non\u2011thread\u2011safe singleton versus an eager\u2011initialized, thread\u2011safe singleton in a high\u2011concurrency web service, and justify which you would choose.",
+        "latency_ms": 9156.95,
+        "grounding_score": 0.2692,
+        "bloom_alignment_score": 1.0,
+        "transition_score": 1.0,
+        "chunks_used": 3
+      },
+      "hybrid_generation": {
+        "question_text": "Now let's look at singleton: Evaluate the trade\u2011offs of using a lazy\u2011initialized singleton with double\u2011checked locking versus an eager initialization in a multithreaded Java application, and justify which you would choose?",
+        "latency_ms": 9421.28,
+        "grounding_score": 0.2963,
+        "bloom_alignment_score": 1.0,
+        "transition_score": 1.0,
+        "chunks_used": 3,
+        "has_prereq_context": true,
+        "prerequisite_reflected": false
+      }
+    },
+    {
+      "scenario_id": "SCEN_06",
+      "domain": "dsa",
+      "skill": "stack",
+      "bloom_level": "Apply",
+      "difficulty": "medium",
+      "weak_topics": [],
+      "dense_generation": {
+        "question_text": "Taking that a step further, implement a function that uses a stack to evaluate a given postfix arithmetic expression and returns its result.",
+        "latency_ms": 10906.97,
+        "grounding_score": 0.3529,
+        "bloom_alignment_score": 1.0,
+        "transition_score": 1.0,
+        "chunks_used": 3
+      },
+      "hybrid_generation": {
+        "question_text": "Now let's examine that from a practical perspective: implement a function that checks whether a given string of parentheses is balanced using a stack?",
+        "latency_ms": 9789.99,
+        "grounding_score": 0.4706,
+        "bloom_alignment_score": 1.0,
+        "transition_score": 1.0,
+        "chunks_used": 3,
+        "has_prereq_context": false,
+        "prerequisite_reflected": false
+      }
+    },
+    {
+      "scenario_id": "SCEN_07",
+      "domain": "os",
+      "skill": "deadlock",
+      "bloom_level": "Analyze",
+      "difficulty": "hard",
+      "weak_topics": [
+        "mutex-vs-semaphore"
+      ],
+      "dense_generation": {
+        "question_text": "Let's shift our focus to deadlock: In production, two microservices each hold a database lock while waiting for a message from the other, causing a stall. How would you analyze the situation and decide between deadlock detection with timeout versus resource ordering to resolve it?",
+        "latency_ms": 11323.3,
+        "grounding_score": 0.5,
+        "bloom_alignment_score": 1.0,
+        "transition_score": 1.0,
+        "chunks_used": 3
+      },
+      "hybrid_generation": {
+        "question_text": "In production, two microservices each hold a database lock while waiting for the other's lock, causing a deadlock; how would you analyze the situation and decide between implementing detection/recovery versus avoidance mechanisms?",
+        "latency_ms": 15862.42,
+        "grounding_score": 0.5714,
+        "bloom_alignment_score": 1.0,
+        "transition_score": 0.8,
+        "chunks_used": 3,
+        "has_prereq_context": true,
+        "prerequisite_reflected": false
+      }
+    },
+    {
+      "scenario_id": "SCEN_08",
+      "domain": "system-design",
+      "skill": "microservices-vs-monolith",
+      "bloom_level": "Create",
+      "difficulty": "hard",
+      "weak_topics": [
+        "cap-theorem"
+      ],
+      "dense_generation": {
+        "question_text": "Moving to microservices vs monolith: imagine a production spike where a single service in a monolithic app is causing latency across all endpoints; design a migration strategy to extract that functionality into a microservice while ensuring zero downtime.",
+        "latency_ms": 11777.31,
+        "grounding_score": 0.1071,
+        "bloom_alignment_score": 1.0,
+        "transition_score": 0.8,
+        "chunks_used": 3
+      },
+      "hybrid_generation": {
+        "question_text": "Now let's look at microservices versus monolith: In production, after splitting a monolith into several services, latency spikes intermittently; design a systematic debugging strategy to pinpoint the problematic service and mitigate impact?",
+        "latency_ms": 5977.43,
+        "grounding_score": 0.1538,
+        "bloom_alignment_score": 1.0,
+        "transition_score": 1.0,
+        "chunks_used": 3,
+        "has_prereq_context": true,
+        "prerequisite_reflected": false
+      }
+    }
+  ]
+}

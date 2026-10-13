@@ -36,6 +36,23 @@ from app.rag.graph_schema import NodeType, RelationType
 logger = logging.getLogger(__name__)
 
 
+# ── Graph Storage Exceptions ──────────────────────────────────────────
+
+class GraphStorageError(Exception):
+    """Base exception for knowledge graph storage and lifecycle operations."""
+    pass
+
+
+class GraphConnectionError(GraphStorageError, ConnectionError):
+    """Raised when a graph storage backend is unreachable or disconnected."""
+    pass
+
+
+class GraphValidationError(GraphStorageError, ValueError):
+    """Raised when graph structure, schema, or ingestion payload is invalid."""
+    pass
+
+
 # ── Abstract Graph Store Contract ─────────────────────────────────────
 
 class BaseGraphStore(ABC):
@@ -151,57 +168,84 @@ class NetworkXGraphStore(BaseGraphStore):
             logger.info("[NetworkXGraphStore] Schema initialized.")
 
     def ingest_graph(self, graph_data: dict) -> dict:
-        """Populate the NetworkX MultiDiGraph from serialized graph_data."""
-        with self._lock:
-            self._graph.clear()
-            self._nodes_by_type.clear()
-            self._concepts_by_domain.clear()
-            self._chunks_by_concept.clear()
-            self._domains_by_skill.clear()
-
-            nodes = graph_data.get("nodes", [])
-            edges = graph_data.get("edges", [])
-
-            for n in nodes:
-                nid = n["id"]
-                ntype = n["type"]
-                props = n.get("properties", {})
-                self._graph.add_node(nid, type=ntype, **props)
-                self._nodes_by_type[ntype].add(nid)
-
-            for e in edges:
-                src = e["source_id"]
-                tgt = e["target_id"]
-                rel = e["relation"]
-                props = {
-                    "relation": rel,
-                    "derivation": e.get("derivation", "metadata"),
-                    "evidence": e.get("evidence", ""),
-                    "confidence": float(e.get("confidence", 1.0)),
-                }
-                self._graph.add_edge(src, tgt, key=rel, **props)
-
-                # Update fast lookup indexes
-                if rel == "CONTAINS":
-                    self._concepts_by_domain[src].add(tgt)
-                elif rel == "HAS_CHUNK":
-                    self._chunks_by_concept.setdefault(src, []).append(tgt)
-                elif rel == "MAPS_TO":
-                    self._domains_by_skill[src.lower()].add(tgt)
-                    if src.lower().startswith("skill_"):
-                        self._domains_by_skill[src[6:].lower()].add(tgt)
-
-            self._initialized = True
-            stats = {
-                "nodes_ingested": len(nodes),
-                "edges_ingested": len(edges),
-                "backend": "networkx",
-            }
-            logger.info(
-                "[NetworkXGraphStore] Ingestion complete: %d nodes, %d edges.",
-                len(nodes), len(edges),
+        """
+        Populate the NetworkX MultiDiGraph from serialized graph_data.
+        Validates payload structure and performs atomic index replacement under lock.
+        """
+        if not isinstance(graph_data, dict):
+            raise GraphValidationError(
+                f"Expected dict for graph_data, got {type(graph_data).__name__}"
             )
-            return stats
+        if "nodes" not in graph_data or "edges" not in graph_data:
+            raise GraphValidationError(
+                "Graph data payload must contain 'nodes' and 'edges' lists."
+            )
+
+        nodes = graph_data.get("nodes", [])
+        edges = graph_data.get("edges", [])
+
+        if not isinstance(nodes, list) or not isinstance(edges, list):
+            raise GraphValidationError("'nodes' and 'edges' must be lists.")
+
+        temp_graph = nx.MultiDiGraph()
+        temp_nodes_by_type: Dict[str, Set[str]] = defaultdict_set()
+        temp_concepts_by_domain: Dict[str, Set[str]] = defaultdict_set()
+        temp_chunks_by_concept: Dict[str, List[str]] = {}
+        temp_domains_by_skill: Dict[str, Set[str]] = defaultdict_set()
+
+        for n in nodes:
+            if not isinstance(n, dict) or "id" not in n or "type" not in n:
+                raise GraphValidationError(f"Invalid node record: {n}")
+            nid = n["id"]
+            ntype = n["type"]
+            props = n.get("properties", {})
+            temp_graph.add_node(nid, type=ntype, **props)
+            temp_nodes_by_type[ntype].add(nid)
+
+        for e in edges:
+            if not isinstance(e, dict) or "source_id" not in e or "target_id" not in e or "relation" not in e:
+                raise GraphValidationError(f"Invalid edge record: {e}")
+            src = e["source_id"]
+            tgt = e["target_id"]
+            rel = e["relation"]
+            props = {
+                "relation": rel,
+                "derivation": e.get("derivation", "metadata"),
+                "evidence": e.get("evidence", ""),
+                "confidence": float(e.get("confidence", 1.0)),
+                "source_chunk_id": e.get("source_chunk_id"),
+                "validation_status": e.get("validation_status", "VALIDATED"),
+            }
+            temp_graph.add_edge(src, tgt, key=rel, **props)
+
+            # Update fast lookup indexes
+            if rel == "CONTAINS":
+                temp_concepts_by_domain[src].add(tgt)
+            elif rel == "HAS_CHUNK":
+                temp_chunks_by_concept.setdefault(src, []).append(tgt)
+            elif rel == "MAPS_TO":
+                temp_domains_by_skill[src.lower()].add(tgt)
+                if src.lower().startswith("skill_"):
+                    temp_domains_by_skill[src[6:].lower()].add(tgt)
+
+        with self._lock:
+            self._graph = temp_graph
+            self._nodes_by_type = temp_nodes_by_type
+            self._concepts_by_domain = temp_concepts_by_domain
+            self._chunks_by_concept = temp_chunks_by_concept
+            self._domains_by_skill = temp_domains_by_skill
+            self._initialized = True
+
+        stats = {
+            "nodes_ingested": len(nodes),
+            "edges_ingested": len(edges),
+            "backend": "networkx",
+        }
+        logger.info(
+            "[NetworkXGraphStore] Ingestion complete: %d nodes, %d edges.",
+            len(nodes), len(edges),
+        )
+        return stats
 
     def get_domain(self, domain_id: str) -> Optional[dict]:
         with self._lock:
@@ -411,7 +455,7 @@ class Neo4jGraphStore(BaseGraphStore):
                         self._driver = GraphDatabase.driver(self._uri, auth=auth)
                     except Exception as e:
                         logger.error("[Neo4jGraphStore] Failed to connect to Neo4j at %s: %s", self._uri, e)
-                        raise ConnectionError(f"Could not connect to Neo4j at {self._uri}: {e}") from e
+                        raise GraphConnectionError(f"Could not connect to Neo4j at {self._uri}: {e}") from e
         return self._driver
 
     def is_connected(self) -> bool:
@@ -446,29 +490,47 @@ class Neo4jGraphStore(BaseGraphStore):
 
     def ingest_graph(self, graph_data: dict) -> dict:
         """Batch-ingest nodes and edges into Neo4j using UNWIND."""
+        if not isinstance(graph_data, dict):
+            raise GraphValidationError(
+                f"Expected dict for graph_data, got {type(graph_data).__name__}"
+            )
+        if "nodes" not in graph_data or "edges" not in graph_data:
+            raise GraphValidationError(
+                "Graph data payload must contain 'nodes' and 'edges' lists."
+            )
+
         driver = self._get_driver()
         self.initialize_schema()
 
         nodes = graph_data.get("nodes", [])
         edges = graph_data.get("edges", [])
 
+        if not isinstance(nodes, list) or not isinstance(edges, list):
+            raise GraphValidationError("'nodes' and 'edges' must be lists.")
+
         # Group nodes by type
-        nodes_by_type: Dict[str, List[dict]] = defaultdict_set()
+        nodes_by_type: Dict[str, List[dict]] = {}
         for n in nodes:
+            if not isinstance(n, dict) or "id" not in n or "type" not in n:
+                raise GraphValidationError(f"Invalid node record: {n}")
             props = dict(n.get("properties", {}))
             props["id"] = n["id"]
             props["type"] = n["type"]
             nodes_by_type.setdefault(n["type"], []).append(props)
 
         # Group edges by relation
-        edges_by_rel: Dict[str, List[dict]] = defaultdict_set()
+        edges_by_rel: Dict[str, List[dict]] = {}
         for e in edges:
+            if not isinstance(e, dict) or "source_id" not in e or "target_id" not in e or "relation" not in e:
+                raise GraphValidationError(f"Invalid edge record: {e}")
             edges_by_rel.setdefault(e["relation"], []).append({
                 "source_id": e["source_id"],
                 "target_id": e["target_id"],
                 "derivation": e.get("derivation", "metadata"),
                 "evidence": e.get("evidence", ""),
                 "confidence": float(e.get("confidence", 1.0)),
+                "source_chunk_id": e.get("source_chunk_id"),
+                "validation_status": e.get("validation_status", "VALIDATED"),
             })
 
         with driver.session(database=self._database) as session:
@@ -494,7 +556,9 @@ class Neo4jGraphStore(BaseGraphStore):
                 MERGE (a)-[r:{rel}]->(b)
                 SET r.derivation = edge.derivation,
                     r.evidence   = edge.evidence,
-                    r.confidence = edge.confidence
+                    r.confidence = edge.confidence,
+                    r.source_chunk_id = edge.source_chunk_id,
+                    r.validation_status = edge.validation_status
                 """
                 session.run(cypher, batch=edge_items)
 
@@ -649,6 +713,45 @@ _store_lock = threading.Lock()
 _active_store: Optional[BaseGraphStore] = None
 
 
+def _load_or_build_graph_data(target_path: str) -> dict:
+    """
+    Load knowledge graph data from target_path or build it from the canonical
+    knowledge base (data/processed) on fresh installations.
+    """
+    if os.path.exists(target_path):
+        try:
+            with open(target_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if not isinstance(data, dict) or "nodes" not in data or "edges" not in data:
+                raise GraphValidationError(
+                    f"Invalid graph payload in {target_path}: missing 'nodes' or 'edges'."
+                )
+            return data
+        except json.JSONDecodeError as e:
+            logger.error("[GraphStore] Corrupted JSON in %s: %s", target_path, e)
+            raise GraphStorageError(f"Corrupted graph data file at {target_path}: {e}") from e
+        except GraphValidationError:
+            raise
+        except Exception as e:
+            logger.error("[GraphStore] Could not load graph data from %s: %s", target_path, e)
+            raise GraphStorageError(f"Could not load graph data from {target_path}: {e}") from e
+
+    # Fresh installation recovery: build deterministically from canonical source
+    from app.rag.graph_builder import _processed_dir, build_graph
+    processed_dir = _processed_dir()
+    if os.path.isdir(processed_dir) and any(os.scandir(processed_dir)):
+        logger.info(
+            "[GraphStore] Graph artefact missing at %s. Initializing fresh graph from canonical knowledge base (%s)...",
+            target_path,
+            processed_dir,
+        )
+        return build_graph(dry_run=True, output_path=target_path)
+
+    raise GraphStorageError(
+        f"Graph data not found at {target_path} and canonical knowledge base ({processed_dir}) is unavailable."
+    )
+
+
 def get_graph_store(
     backend: Optional[str] = None,
     graph_data_path: Optional[str] = None,
@@ -657,10 +760,10 @@ def get_graph_store(
     Return the active graph store instance configured for the environment.
 
     Backend resolution logic:
-      - 'neo4j': Attempt Neo4j connection; fail with ConnectionError if unavailable.
-      - 'networkx': Always use NetworkXGraphStore.
+      - 'neo4j': Attempt Neo4j connection; fail with GraphConnectionError if unavailable.
+      - 'networkx': Always use NetworkXGraphStore loaded with canonical graph data.
       - 'auto' (default): Probe Neo4j connection. If alive, use Neo4jGraphStore;
-        otherwise gracefully fallback to NetworkXGraphStore with an informative log.
+        otherwise gracefully fallback to NetworkXGraphStore without data loss.
     """
     global _active_store
 
@@ -673,14 +776,23 @@ def get_graph_store(
         if _active_store is not None:
             return _active_store
 
+        from app.rag.graph_builder import _output_path
+        target_path = graph_data_path or _output_path()
+
         # 1. Explicit Neo4j requested
         if chosen_backend == "neo4j":
             logger.info("[GraphStore] Initializing explicit Neo4jGraphStore (%s)", NEO4J_URI)
             store = Neo4jGraphStore()
             if not store.is_connected():
-                raise ConnectionError(
+                raise GraphConnectionError(
                     f"GRAPH_STORAGE_BACKEND='neo4j' specified, but Neo4j is not reachable at {NEO4J_URI}"
                 )
+            store.initialize_schema()
+            stats = store.get_stats()
+            if stats.get("total_nodes", 0) == 0:
+                logger.info("[GraphStore] Neo4j is unpopulated. Ingesting canonical graph data...")
+                data = _load_or_build_graph_data(target_path)
+                store.ingest_graph(data)
             _active_store = store
             return _active_store
 
@@ -690,6 +802,12 @@ def get_graph_store(
                 store = Neo4jGraphStore()
                 if store.is_connected():
                     logger.info("[GraphStore] Neo4j instance detected at %s. Using Neo4jGraphStore.", NEO4J_URI)
+                    store.initialize_schema()
+                    stats = store.get_stats()
+                    if stats.get("total_nodes", 0) == 0:
+                        logger.info("[GraphStore] Auto-populating empty Neo4j instance from canonical graph...")
+                        data = _load_or_build_graph_data(target_path)
+                        store.ingest_graph(data)
                     _active_store = store
                     return _active_store
             except Exception as e:
@@ -701,23 +819,39 @@ def get_graph_store(
             )
 
         # 3. Fallback / Default NetworkX
-        from app.rag.graph_builder import _output_path
-        target_path = graph_data_path or _output_path()
-
-        graph_data = None
-        if os.path.exists(target_path):
-            try:
-                with open(target_path, "r", encoding="utf-8") as f:
-                    graph_data = json.load(f)
-            except Exception as e:
-                logger.warning("[GraphStore] Could not load graph data from %s: %s", target_path, e)
-
-        _active_store = NetworkXGraphStore(graph_data=graph_data)
+        graph_data = _load_or_build_graph_data(target_path)
+        nx_store = NetworkXGraphStore(graph_data=graph_data)
+        nx_store.initialize_schema()
+        _active_store = nx_store
         return _active_store
 
 
+def ensure_graph_initialized(
+    backend: Optional[str] = None,
+    graph_data_path: Optional[str] = None,
+    force_rebuild: bool = False,
+) -> BaseGraphStore:
+    """
+    Guarantees the knowledge graph store is initialized, schema verified,
+    and populated with nodes and edges before graph retrieval begins.
+    """
+    global _active_store
+    if force_rebuild:
+        reset_graph_store()
+        from app.rag.graph_builder import _output_path, build_graph
+        target = graph_data_path or _output_path()
+        build_graph(dry_run=True, output_path=target)
+
+    store = get_graph_store(backend=backend, graph_data_path=graph_data_path)
+    store.initialize_schema()
+    stats = store.get_stats()
+    if stats.get("total_nodes", 0) == 0:
+        raise GraphStorageError("Graph initialization completed but store contains 0 nodes.")
+    return store
+
+
 def reset_graph_store() -> None:
-    """Reset the singleton store (used by tests)."""
+    """Reset the singleton store (used by tests and lifecycle hooks)."""
     global _active_store
     with _store_lock:
         if _active_store:

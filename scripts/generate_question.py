@@ -436,7 +436,7 @@ def build_prompt(skill, rag_chunks, project_context, difficulty, question_type, 
     if rag_chunks:
         rag_parts = []
         for c in rag_chunks[:3]:
-            rag_parts.append(f"[{c['domain']}/{c['concept']}]\n{c['text'][:400]}")
+            rag_parts.append(f"[{c['domain']}/{c['concept']}]\n{c['text']}")
         rag_text = "\n---\n".join(rag_parts)
     else:
         rag_text = "None available."

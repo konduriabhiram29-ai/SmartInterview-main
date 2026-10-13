@@ -94,26 +94,29 @@ def _get_prompts():
     return _prompts
 
 
+_retrievers = {}
+
+
 def _get_retriever(mode: str | None = None):
     """
-    Return the active BaseRetriever singleton.
+    Return the active BaseRetriever singleton for the given mode.
     Respects app.config.RAG_MODE (dense, keyword, graph, hybrid).
     """
-    global _retriever
+    global _retriever, _retrievers
     _init_rag()  # ensure embedding model and collection are ready
     from app.config import RAG_MODE
     effective_mode = (mode or RAG_MODE or "dense").lower().strip()
-    if _retriever is None or getattr(_retriever, "_mode", None) != effective_mode:
+    if effective_mode not in _retrievers:
         with _lock:
-            if _retriever is None or getattr(_retriever, "_mode", None) != effective_mode:
+            if effective_mode not in _retrievers:
                 from app.rag.retriever_factory import get_retriever
-                _retriever = get_retriever(
+                _retrievers[effective_mode] = get_retriever(
                     embedding_model=_embedding_model,
                     chroma_collection=_chroma_collection,
                     build_rag_query_fn=build_rag_query,
                     mode=effective_mode,
                 )
-                setattr(_retriever, "_mode", effective_mode)
+    _retriever = _retrievers[effective_mode]
     return _retriever
 
 
@@ -201,12 +204,20 @@ def generate_single_question(
     # Resolve skill → knowledge-base domains
     skill_domains = resolve_skill_domains(skill)
 
-    # ── RAG retrieval via retriever abstraction (Phase 1, 6, 7, 8, 10) ──
+    # ── RAG retrieval via retriever abstraction (Phase 1, 6, 7, 8, 9, 10) ──
     from app.config import RAG_MODE, RERANKER_ENABLED, RERANKER_TOP_K
-    retriever = _get_retriever()
+    valid_rag_modes = {"dense", "vector", "keyword", "bm25", "graph", "hybrid"}
+    raw_mode = kwargs.get("rag_mode") or kwargs.get("retrieval_mode")
+    if not raw_mode and "mode" in kwargs and kwargs["mode"] in valid_rag_modes:
+        raw_mode = kwargs["mode"]
+    effective_mode = (raw_mode or RAG_MODE or "dense").lower().strip()
+    if effective_mode not in valid_rag_modes:
+        effective_mode = "dense"
+
+    retriever = _get_retriever(mode=effective_mode)
     rag_query = build_rag_query(skill, skill_domains)
     bloom_id = bloom_level.id if hasattr(bloom_level, "id") else (str(bloom_level) if bloom_level else None)
-    fetch_k = 10 if RAG_MODE in {"hybrid", "graph"} else 3
+    fetch_k = 10 if effective_mode in {"hybrid", "graph"} else 3
 
     retrieval_results = retriever.retrieve(
         query=rag_query,
@@ -218,8 +229,9 @@ def generate_single_question(
         **kwargs,
     )
 
-    # ── Contextual Reranking (Phase 9 & 10) ──
-    if RERANKER_ENABLED and len(retrieval_results) > 1:
+    # ── Contextual Reranking (Phase 8, 9 & 10) ──
+    # Dense mode must NEVER invoke reranking. Reranking is ONLY applied to non-dense candidates when enabled.
+    if effective_mode not in {"dense", "vector"} and RERANKER_ENABLED and len(retrieval_results) > 1:
         reranker = _get_reranker()
         if reranker is not None:
             retrieval_results = reranker.rerank(
@@ -266,6 +278,21 @@ def generate_single_question(
             f"The question MUST target the '{bloom_level.name}' cognitive level."
         )
         user_prompt += bloom_instruction
+
+    # Add Graph Relationship Guidance if graph / prerequisite chunks exist
+    graph_notes = []
+    for c in rag_chunks:
+        meta = c.get("metadata") or {}
+        if meta.get("role") == "prerequisite":
+            graph_notes.append(f"- Concept '{c['concept']}' is an established prerequisite for {skill}.")
+        elif meta.get("remediation"):
+            graph_notes.append(f"- Remediation Context: Prerequisite concept '{c['concept']}' addresses candidate weak topic.")
+    if graph_notes:
+        user_prompt += (
+            "\n\nKnowledge Graph Prerequisite Context:\n"
+            + "\n".join(graph_notes)
+            + "\nYou may assess foundational understanding of these prerequisite concepts in relation to the main skill."
+        )
 
     # Add subtle conversational transition guidance for subsequent questions
     if previous_questions and len(previous_questions) > 0:
@@ -319,6 +346,7 @@ def generate_single_question(
         "bloom_level_number": bloom_level.order if hasattr(bloom_level, "order") else None,
         "rag_retrieval_results": [r.to_dict() for r in retrieval_results[:3]],
         "weak_topics": weak_topics or [],
+        "rag_mode": effective_mode,
     }
 
     return result

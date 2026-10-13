@@ -1,0 +1,939 @@
+[
+  {
+    "query_id": "GOLD_01",
+    "query": "What is the Domain Name System?",
+    "domain": "cn",
+    "concept": "dns",
+    "bloom_level": "remember",
+    "difficulty": "easy",
+    "scenario_type": "standard",
+    "expected_chunk_ids": [
+      "cn_dns_001",
+      "cn_dns_002",
+      "cn_dns_003",
+      "cn_dns_004",
+      "cn_dns_005",
+      "cn_dns_006",
+      "cn_dns_007",
+      "cn_dns_008"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "domain name system",
+      "ip address",
+      "resolver",
+      "root server",
+      "tld"
+    ]
+  },
+  {
+    "query_id": "GOLD_02",
+    "query": "How is HTTP different from HTTPS?",
+    "domain": "cn",
+    "concept": "http-vs-https",
+    "bloom_level": "understand",
+    "difficulty": "medium",
+    "scenario_type": "terminology",
+    "expected_chunk_ids": [
+      "cn_http-vs-https_001",
+      "cn_http-vs-https_002",
+      "cn_http-vs-https_003",
+      "cn_http-vs-https_004",
+      "cn_http-vs-https_005"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "ssl",
+      "tls",
+      "encryption",
+      "handshake",
+      "port 443",
+      "certificate"
+    ]
+  },
+  {
+    "query_id": "GOLD_03",
+    "query": "What are the key differences between TCP and UDP protocols?",
+    "domain": "cn",
+    "concept": "tcp-vs-udp",
+    "bloom_level": "analyze",
+    "difficulty": "medium",
+    "scenario_type": "cognitive",
+    "expected_chunk_ids": [
+      "cn_tcp-vs-udp_001",
+      "cn_tcp-vs-udp_002"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "connection-oriented",
+      "three-way handshake",
+      "reliability",
+      "flow control",
+      "datagram"
+    ]
+  },
+  {
+    "query_id": "GOLD_04",
+    "query": "Explain the 7 layers of the OSI model.",
+    "domain": "cn",
+    "concept": "osi-model",
+    "bloom_level": "understand",
+    "difficulty": "medium",
+    "scenario_type": "standard",
+    "expected_chunk_ids": [
+      "cn_osi-model_001",
+      "cn_osi-model_002",
+      "cn_osi-model_003",
+      "cn_osi-model_004",
+      "cn_osi-model_005",
+      "cn_osi-model_006",
+      "cn_osi-model_007",
+      "cn_osi-model_008",
+      "cn_osi-model_009",
+      "cn_osi-model_010",
+      "cn_osi-model_011",
+      "cn_osi-model_012",
+      "cn_osi-model_013"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "physical",
+      "data link",
+      "network",
+      "transport",
+      "session",
+      "presentation",
+      "application"
+    ]
+  },
+  {
+    "query_id": "GOLD_05",
+    "query": "What are the ACID properties in database transactions?",
+    "domain": "dbms",
+    "concept": "acid-properties",
+    "bloom_level": "understand",
+    "difficulty": "medium",
+    "scenario_type": "multi_hop",
+    "expected_chunk_ids": [
+      "dbms_acid-properties_001",
+      "dbms_acid-properties_002",
+      "dbms_acid-properties_003",
+      "dbms_acid-properties_004",
+      "dbms_acid-properties_005",
+      "dbms_acid-properties_006",
+      "dbms_acid-properties_007",
+      "dbms_acid-properties_008"
+    ],
+    "expected_prerequisites": [
+      "transactions"
+    ],
+    "key_terms": [
+      "atomicity",
+      "consistency",
+      "isolation",
+      "durability",
+      "transaction"
+    ]
+  },
+  {
+    "query_id": "GOLD_06",
+    "query": "Why do we use indexing in SQL databases?",
+    "domain": "dbms",
+    "concept": "indexing",
+    "bloom_level": "understand",
+    "difficulty": "medium",
+    "scenario_type": "terminology",
+    "expected_chunk_ids": [
+      "dbms_indexing_001",
+      "dbms_indexing_002",
+      "dbms_indexing_003",
+      "dbms_indexing_004",
+      "dbms_indexing_005",
+      "dbms_indexing_006",
+      "dbms_indexing_007",
+      "dbms_indexing_008",
+      "dbms_indexing_009"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "b-tree",
+      "clustered",
+      "non-clustered",
+      "search",
+      "lookup",
+      "performance"
+    ]
+  },
+  {
+    "query_id": "GOLD_07",
+    "query": "Explain primary keys and foreign keys.",
+    "domain": "dbms",
+    "concept": "keys",
+    "bloom_level": "remember",
+    "difficulty": "easy",
+    "scenario_type": "standard",
+    "expected_chunk_ids": [
+      "dbms_keys_001",
+      "dbms_keys_002",
+      "dbms_keys_003",
+      "dbms_keys_004",
+      "dbms_keys_005",
+      "dbms_keys_006",
+      "dbms_keys_007",
+      "dbms_keys_008",
+      "dbms_keys_009",
+      "dbms_keys_010"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "primary key",
+      "foreign key",
+      "candidate key",
+      "referential integrity"
+    ]
+  },
+  {
+    "query_id": "GOLD_08",
+    "query": "What is database normalization and why is it used?",
+    "domain": "dbms",
+    "concept": "normalization",
+    "bloom_level": "analyze",
+    "difficulty": "hard",
+    "scenario_type": "cognitive",
+    "expected_chunk_ids": [
+      "dbms_normalization_001",
+      "dbms_normalization_002",
+      "dbms_normalization_003",
+      "dbms_normalization_004",
+      "dbms_normalization_005",
+      "dbms_normalization_006",
+      "dbms_normalization_007"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "1nf",
+      "2nf",
+      "3nf",
+      "bcnf",
+      "redundancy",
+      "anomaly",
+      "functional dependency"
+    ]
+  },
+  {
+    "query_id": "GOLD_09",
+    "query": "How does the Factory design pattern work?",
+    "domain": "design-patterns",
+    "concept": "factory",
+    "bloom_level": "apply",
+    "difficulty": "medium",
+    "scenario_type": "standard",
+    "expected_chunk_ids": [
+      "design-patterns_factory_001",
+      "design-patterns_factory_002",
+      "design-patterns_factory_003",
+      "design-patterns_factory_004",
+      "design-patterns_factory_005",
+      "design-patterns_factory_006",
+      "design-patterns_factory_007",
+      "design-patterns_factory_008",
+      "design-patterns_factory_009",
+      "design-patterns_factory_010"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "factory method",
+      "creation",
+      "instantiation",
+      "abstract",
+      "interface"
+    ]
+  },
+  {
+    "query_id": "GOLD_10",
+    "query": "What is the Observer pattern and how does it use publish-subscribe?",
+    "domain": "design-patterns",
+    "concept": "observer",
+    "bloom_level": "apply",
+    "difficulty": "medium",
+    "scenario_type": "standard",
+    "expected_chunk_ids": [
+      "design-patterns_observer_001",
+      "design-patterns_observer_002",
+      "design-patterns_observer_003",
+      "design-patterns_observer_004",
+      "design-patterns_observer_005",
+      "design-patterns_observer_006",
+      "design-patterns_observer_007",
+      "design-patterns_observer_008",
+      "design-patterns_observer_009",
+      "design-patterns_observer_010",
+      "design-patterns_observer_011",
+      "design-patterns_observer_012",
+      "design-patterns_observer_013",
+      "design-patterns_observer_014",
+      "design-patterns_observer_015",
+      "design-patterns_observer_016",
+      "design-patterns_observer_017",
+      "design-patterns_observer_018",
+      "design-patterns_observer_019",
+      "design-patterns_observer_020",
+      "design-patterns_observer_021",
+      "design-patterns_observer_022",
+      "design-patterns_observer_023",
+      "design-patterns_observer_024",
+      "design-patterns_observer_025",
+      "design-patterns_observer_026",
+      "design-patterns_observer_027",
+      "design-patterns_observer_028",
+      "design-patterns_observer_029",
+      "design-patterns_observer_030",
+      "design-patterns_observer_031",
+      "design-patterns_observer_032",
+      "design-patterns_observer_033",
+      "design-patterns_observer_034"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "publish-subscribe",
+      "subject",
+      "listener",
+      "notify",
+      "event"
+    ]
+  },
+  {
+    "query_id": "GOLD_11",
+    "query": "When should you use the Singleton pattern?",
+    "domain": "design-patterns",
+    "concept": "singleton",
+    "bloom_level": "understand",
+    "difficulty": "easy",
+    "scenario_type": "terminology",
+    "expected_chunk_ids": [
+      "design-patterns_singleton_001",
+      "design-patterns_singleton_002",
+      "design-patterns_singleton_003",
+      "design-patterns_singleton_004",
+      "design-patterns_singleton_005",
+      "design-patterns_singleton_006",
+      "design-patterns_singleton_007",
+      "design-patterns_singleton_008",
+      "design-patterns_singleton_009",
+      "design-patterns_singleton_010",
+      "design-patterns_singleton_011",
+      "design-patterns_singleton_012",
+      "design-patterns_singleton_013",
+      "design-patterns_singleton_014",
+      "design-patterns_singleton_015",
+      "design-patterns_singleton_016",
+      "design-patterns_singleton_017",
+      "design-patterns_singleton_018",
+      "design-patterns_singleton_019",
+      "design-patterns_singleton_020",
+      "design-patterns_singleton_021",
+      "design-patterns_singleton_022",
+      "design-patterns_singleton_023",
+      "design-patterns_singleton_024",
+      "design-patterns_singleton_025",
+      "design-patterns_singleton_026"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "single instance",
+      "global access",
+      "private constructor",
+      "thread safety"
+    ]
+  },
+  {
+    "query_id": "GOLD_12",
+    "query": "Explain the Strategy design pattern.",
+    "domain": "design-patterns",
+    "concept": "strategy",
+    "bloom_level": "apply",
+    "difficulty": "medium",
+    "scenario_type": "standard",
+    "expected_chunk_ids": [
+      "design-patterns_strategy_001",
+      "design-patterns_strategy_002",
+      "design-patterns_strategy_003",
+      "design-patterns_strategy_004",
+      "design-patterns_strategy_005",
+      "design-patterns_strategy_006",
+      "design-patterns_strategy_007",
+      "design-patterns_strategy_008",
+      "design-patterns_strategy_009",
+      "design-patterns_strategy_010",
+      "design-patterns_strategy_011",
+      "design-patterns_strategy_012",
+      "design-patterns_strategy_013",
+      "design-patterns_strategy_014",
+      "design-patterns_strategy_015",
+      "design-patterns_strategy_016",
+      "design-patterns_strategy_017",
+      "design-patterns_strategy_018",
+      "design-patterns_strategy_019",
+      "design-patterns_strategy_020",
+      "design-patterns_strategy_021",
+      "design-patterns_strategy_022",
+      "design-patterns_strategy_023",
+      "design-patterns_strategy_024",
+      "design-patterns_strategy_025",
+      "design-patterns_strategy_026",
+      "design-patterns_strategy_027",
+      "design-patterns_strategy_028",
+      "design-patterns_strategy_029",
+      "design-patterns_strategy_030",
+      "design-patterns_strategy_031",
+      "design-patterns_strategy_032",
+      "design-patterns_strategy_033",
+      "design-patterns_strategy_034",
+      "design-patterns_strategy_035"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "algorithm family",
+      "interchangeable",
+      "composition",
+      "runtime"
+    ]
+  },
+  {
+    "query_id": "GOLD_13",
+    "query": "What is an array and how are elements stored in memory?",
+    "domain": "dsa",
+    "concept": "array",
+    "bloom_level": "remember",
+    "difficulty": "easy",
+    "scenario_type": "standard",
+    "expected_chunk_ids": [
+      "dsa_array_001",
+      "dsa_array_002",
+      "dsa_array_003",
+      "dsa_array_004",
+      "dsa_array_005",
+      "dsa_array_006",
+      "dsa_array_007",
+      "dsa_array_008",
+      "dsa_array_009"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "contiguous",
+      "index",
+      "o(1) access",
+      "memory layout"
+    ]
+  },
+  {
+    "query_id": "GOLD_14",
+    "query": "How does a hash table resolve collisions?",
+    "domain": "dsa",
+    "concept": "hash-table",
+    "bloom_level": "understand",
+    "difficulty": "medium",
+    "scenario_type": "multi_hop",
+    "expected_chunk_ids": [
+      "dsa_hash-table_001",
+      "dsa_hash-table_002",
+      "dsa_hash-table_003"
+    ],
+    "expected_prerequisites": [
+      "array"
+    ],
+    "key_terms": [
+      "hash function",
+      "collision",
+      "chaining",
+      "open addressing",
+      "buckets"
+    ]
+  },
+  {
+    "query_id": "GOLD_15",
+    "query": "What is the difference between a stack and a queue?",
+    "domain": "dsa",
+    "concept": "stack",
+    "bloom_level": "understand",
+    "difficulty": "easy",
+    "scenario_type": "remediation",
+    "expected_chunk_ids": [
+      "dsa_stack_001",
+      "dsa_stack_002"
+    ],
+    "expected_prerequisites": [
+      "linked-list"
+    ],
+    "key_terms": [
+      "lifo",
+      "push",
+      "pop",
+      "peek",
+      "queue"
+    ]
+  },
+  {
+    "query_id": "GOLD_16",
+    "query": "How does a binary search tree work?",
+    "domain": "dsa",
+    "concept": "tree",
+    "bloom_level": "understand",
+    "difficulty": "medium",
+    "scenario_type": "standard",
+    "expected_chunk_ids": [
+      "dsa_tree_001",
+      "dsa_tree_002",
+      "dsa_tree_003",
+      "dsa_tree_004",
+      "dsa_tree_005",
+      "dsa_tree_006"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "binary search tree",
+      "root",
+      "left child",
+      "right child",
+      "traversal"
+    ]
+  },
+  {
+    "query_id": "GOLD_17",
+    "query": "What is dynamic programming?",
+    "domain": "dsa",
+    "concept": "dynamic-programming",
+    "bloom_level": "analyze",
+    "difficulty": "hard",
+    "scenario_type": "cognitive",
+    "expected_chunk_ids": [
+      "dsa_dynamic-programming_001"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "optimal substructure",
+      "overlapping subproblems",
+      "memoization",
+      "tabulation"
+    ]
+  },
+  {
+    "query_id": "GOLD_18",
+    "query": "Explain the bias-variance tradeoff in machine learning.",
+    "domain": "ml-dl",
+    "concept": "bias-variance-tradeoff",
+    "bloom_level": "understand",
+    "difficulty": "medium",
+    "scenario_type": "multi_hop",
+    "expected_chunk_ids": [
+      "ml-dl_bias-variance-tradeoff_001",
+      "ml-dl_bias-variance-tradeoff_002",
+      "ml-dl_bias-variance-tradeoff_003",
+      "ml-dl_bias-variance-tradeoff_004",
+      "ml-dl_bias-variance-tradeoff_005"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "bias",
+      "variance",
+      "underfitting",
+      "overfitting",
+      "generalization"
+    ]
+  },
+  {
+    "query_id": "GOLD_19",
+    "query": "What is the difference between linear regression and logistic regression?",
+    "domain": "ml-dl",
+    "concept": "linear-vs-logistic-regression",
+    "bloom_level": "analyze",
+    "difficulty": "medium",
+    "scenario_type": "cognitive",
+    "expected_chunk_ids": [
+      "ml-dl_linear-vs-logistic-regression_001",
+      "ml-dl_linear-vs-logistic-regression_002",
+      "ml-dl_linear-vs-logistic-regression_003",
+      "ml-dl_linear-vs-logistic-regression_004",
+      "ml-dl_linear-vs-logistic-regression_005"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "continuous",
+      "classification",
+      "sigmoid",
+      "decision boundary"
+    ]
+  },
+  {
+    "query_id": "GOLD_20",
+    "query": "How do decision trees work in classification?",
+    "domain": "ml-dl",
+    "concept": "decision-trees",
+    "bloom_level": "understand",
+    "difficulty": "medium",
+    "scenario_type": "standard",
+    "expected_chunk_ids": [
+      "ml-dl_decision-trees_001",
+      "ml-dl_decision-trees_002",
+      "ml-dl_decision-trees_003",
+      "ml-dl_decision-trees_004",
+      "ml-dl_decision-trees_005",
+      "ml-dl_decision-trees_006",
+      "ml-dl_decision-trees_007",
+      "ml-dl_decision-trees_008",
+      "ml-dl_decision-trees_009",
+      "ml-dl_decision-trees_010",
+      "ml-dl_decision-trees_011"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "gini impurity",
+      "entropy",
+      "information gain",
+      "split",
+      "pruning"
+    ]
+  },
+  {
+    "query_id": "GOLD_21",
+    "query": "What causes overfitting in a neural network model?",
+    "domain": "ml-dl",
+    "concept": "overfitting-vs-underfitting",
+    "bloom_level": "analyze",
+    "difficulty": "medium",
+    "scenario_type": "remediation",
+    "expected_chunk_ids": [
+      "ml-dl_overfitting-vs-underfitting_001",
+      "ml-dl_overfitting-vs-underfitting_002",
+      "ml-dl_overfitting-vs-underfitting_003",
+      "ml-dl_overfitting-vs-underfitting_004",
+      "ml-dl_overfitting-vs-underfitting_005"
+    ],
+    "expected_prerequisites": [
+      "bias-variance-tradeoff"
+    ],
+    "key_terms": [
+      "generalization error",
+      "regularization",
+      "training loss",
+      "validation loss"
+    ]
+  },
+  {
+    "query_id": "GOLD_22",
+    "query": "What is the concept of encapsulation in object-oriented programming?",
+    "domain": "oop",
+    "concept": "encapsulation",
+    "bloom_level": "remember",
+    "difficulty": "easy",
+    "scenario_type": "standard",
+    "expected_chunk_ids": [
+      "oop_encapsulation_001",
+      "oop_encapsulation_002",
+      "oop_encapsulation_003",
+      "oop_encapsulation_004"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "data hiding",
+      "private",
+      "getters",
+      "setters",
+      "bundle data methods"
+    ]
+  },
+  {
+    "query_id": "GOLD_23",
+    "query": "Explain polymorphism with an example.",
+    "domain": "oop",
+    "concept": "polymorphism",
+    "bloom_level": "understand",
+    "difficulty": "medium",
+    "scenario_type": "standard",
+    "expected_chunk_ids": [
+      "oop_polymorphism_001",
+      "oop_polymorphism_002",
+      "oop_polymorphism_003",
+      "oop_polymorphism_004",
+      "oop_polymorphism_005",
+      "oop_polymorphism_006",
+      "oop_polymorphism_007",
+      "oop_polymorphism_008",
+      "oop_polymorphism_009",
+      "oop_polymorphism_010"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "method overriding",
+      "method overloading",
+      "runtime",
+      "compile-time"
+    ]
+  },
+  {
+    "query_id": "GOLD_24",
+    "query": "Why should we prefer composition over inheritance?",
+    "domain": "oop",
+    "concept": "composition-inheritance",
+    "bloom_level": "evaluate",
+    "difficulty": "hard",
+    "scenario_type": "cognitive",
+    "expected_chunk_ids": [
+      "oop_composition-inheritance_001",
+      "oop_composition-inheritance_002",
+      "oop_composition-inheritance_003",
+      "oop_composition-inheritance_004",
+      "oop_composition-inheritance_005",
+      "oop_composition-inheritance_006",
+      "oop_composition-inheritance_007"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "is-a",
+      "has-a",
+      "coupling",
+      "flexibility",
+      "fragile base class"
+    ]
+  },
+  {
+    "query_id": "GOLD_25",
+    "query": "What is abstraction in OOP?",
+    "domain": "oop",
+    "concept": "abstraction",
+    "bloom_level": "understand",
+    "difficulty": "easy",
+    "scenario_type": "standard",
+    "expected_chunk_ids": [
+      "oop_abstraction_001",
+      "oop_abstraction_002",
+      "oop_abstraction_003",
+      "oop_abstraction_004",
+      "oop_abstraction_005",
+      "oop_abstraction_006"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "hide complexity",
+      "essential features",
+      "interfaces",
+      "abstract class"
+    ]
+  },
+  {
+    "query_id": "GOLD_26",
+    "query": "What are the four necessary conditions for a deadlock to occur?",
+    "domain": "os",
+    "concept": "deadlock",
+    "bloom_level": "analyze",
+    "difficulty": "hard",
+    "scenario_type": "multi_hop",
+    "expected_chunk_ids": [
+      "os_deadlock_001",
+      "os_deadlock_002",
+      "os_deadlock_003"
+    ],
+    "expected_prerequisites": [
+      "mutex-vs-semaphore"
+    ],
+    "key_terms": [
+      "mutual exclusion",
+      "hold and wait",
+      "no preemption",
+      "circular wait"
+    ]
+  },
+  {
+    "query_id": "GOLD_27",
+    "query": "What is the difference between a mutex and a semaphore?",
+    "domain": "os",
+    "concept": "mutex-vs-semaphore",
+    "bloom_level": "analyze",
+    "difficulty": "medium",
+    "scenario_type": "terminology",
+    "expected_chunk_ids": [
+      "os_mutex-vs-semaphore_001",
+      "os_mutex-vs-semaphore_002",
+      "os_mutex-vs-semaphore_003",
+      "os_mutex-vs-semaphore_004",
+      "os_mutex-vs-semaphore_005",
+      "os_mutex-vs-semaphore_006",
+      "os_mutex-vs-semaphore_007",
+      "os_mutex-vs-semaphore_008"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "locking mechanism",
+      "signaling mechanism",
+      "binary semaphore",
+      "counting semaphore",
+      "ownership"
+    ]
+  },
+  {
+    "query_id": "GOLD_28",
+    "query": "How is a process different from a thread?",
+    "domain": "os",
+    "concept": "process-vs-thread",
+    "bloom_level": "understand",
+    "difficulty": "easy",
+    "scenario_type": "standard",
+    "expected_chunk_ids": [
+      "os_process-vs-thread_001",
+      "os_process-vs-thread_002",
+      "os_process-vs-thread_003",
+      "os_process-vs-thread_004"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "isolated address space",
+      "shared memory",
+      "context switch",
+      "lightweight"
+    ]
+  },
+  {
+    "query_id": "GOLD_29",
+    "query": "What is virtual memory and paging?",
+    "domain": "os",
+    "concept": "virtual-memory",
+    "bloom_level": "understand",
+    "difficulty": "medium",
+    "scenario_type": "standard",
+    "expected_chunk_ids": [
+      "os_virtual-memory_001",
+      "os_virtual-memory_002",
+      "os_virtual-memory_003",
+      "os_virtual-memory_004",
+      "os_virtual-memory_005",
+      "os_virtual-memory_006",
+      "os_virtual-memory_007",
+      "os_virtual-memory_008",
+      "os_virtual-memory_009",
+      "os_virtual-memory_010"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "paging",
+      "page table",
+      "tlb",
+      "page fault",
+      "swap space"
+    ]
+  },
+  {
+    "query_id": "GOLD_30",
+    "query": "Why do we use caching in distributed systems?",
+    "domain": "system-design",
+    "concept": "caching",
+    "bloom_level": "understand",
+    "difficulty": "easy",
+    "scenario_type": "standard",
+    "expected_chunk_ids": [
+      "system-design_caching_001",
+      "system-design_caching_002",
+      "system-design_caching_003",
+      "system-design_caching_004",
+      "system-design_caching_005",
+      "system-design_caching_006",
+      "system-design_caching_007",
+      "system-design_caching_008",
+      "system-design_caching_009",
+      "system-design_caching_010",
+      "system-design_caching_011"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "latency reduction",
+      "cache invalidation",
+      "ttl",
+      "lru",
+      "write-through"
+    ]
+  },
+  {
+    "query_id": "GOLD_31",
+    "query": "Explain the CAP theorem.",
+    "domain": "system-design",
+    "concept": "cap-theorem",
+    "bloom_level": "analyze",
+    "difficulty": "hard",
+    "scenario_type": "cognitive",
+    "expected_chunk_ids": [
+      "system-design_cap-theorem_001",
+      "system-design_cap-theorem_002",
+      "system-design_cap-theorem_003",
+      "system-design_cap-theorem_004",
+      "system-design_cap-theorem_005",
+      "system-design_cap-theorem_006",
+      "system-design_cap-theorem_007",
+      "system-design_cap-theorem_008",
+      "system-design_cap-theorem_009"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "consistency",
+      "availability",
+      "partition tolerance",
+      "network partition"
+    ]
+  },
+  {
+    "query_id": "GOLD_32",
+    "query": "How does consistent hashing help with load balancing?",
+    "domain": "system-design",
+    "concept": "consistent-hashing",
+    "bloom_level": "apply",
+    "difficulty": "hard",
+    "scenario_type": "multi_hop",
+    "expected_chunk_ids": [
+      "system-design_consistent-hashing_001",
+      "system-design_consistent-hashing_002",
+      "system-design_consistent-hashing_003",
+      "system-design_consistent-hashing_004",
+      "system-design_consistent-hashing_005",
+      "system-design_consistent-hashing_006",
+      "system-design_consistent-hashing_007",
+      "system-design_consistent-hashing_008",
+      "system-design_consistent-hashing_009",
+      "system-design_consistent-hashing_010",
+      "system-design_consistent-hashing_011",
+      "system-design_consistent-hashing_012",
+      "system-design_consistent-hashing_013",
+      "system-design_consistent-hashing_014",
+      "system-design_consistent-hashing_015",
+      "system-design_consistent-hashing_016"
+    ],
+    "expected_prerequisites": [
+      "load-balancing"
+    ],
+    "key_terms": [
+      "hash ring",
+      "virtual nodes",
+      "horizontal scaling",
+      "data rebalancing"
+    ]
+  },
+  {
+    "query_id": "GOLD_33",
+    "query": "What are the benefits of microservices over monoliths?",
+    "domain": "system-design",
+    "concept": "microservices-vs-monolith",
+    "bloom_level": "evaluate",
+    "difficulty": "hard",
+    "scenario_type": "cognitive",
+    "expected_chunk_ids": [
+      "system-design_microservices-vs-monolith_001",
+      "system-design_microservices-vs-monolith_002",
+      "system-design_microservices-vs-monolith_003",
+      "system-design_microservices-vs-monolith_004"
+    ],
+    "expected_prerequisites": [],
+    "key_terms": [
+      "independent deployment",
+      "network overhead",
+      "distributed transactions",
+      "scalability"
+    ]
+  }
+]

@@ -37,6 +37,7 @@ from app.rag.graph_validator import (
     check_orphan_concepts,
     check_orphan_chunks,
     check_prerequisite_acyclicity,
+    check_contradictory_edges,
 )
 from app.rag.graph_builder import _output_path
 
@@ -231,4 +232,24 @@ class TestDefectDetection:
         ]
         is_acyclic, issues = check_prerequisite_acyclicity(edges)
         assert is_acyclic is True
+        assert len(issues) == 0
+
+    def test_contradictory_mutual_prerequisites_detected(self):
+        # A -> B and B -> A (contradictory mutual prerequisite)
+        edges = [
+            {"source_id": "concept_a", "target_id": "concept_b", "relation": "PREREQUISITE_OF"},
+            {"source_id": "concept_b", "target_id": "concept_a", "relation": "PREREQUISITE_OF"},
+        ]
+        invalid, issues = check_contradictory_edges(edges)
+        assert len(invalid) == 1
+        assert len(issues) == 1
+        assert "Contradictory reciprocal prerequisite" in issues[0].message
+
+    def test_valid_unidirectional_prerequisites_pass(self):
+        edges = [
+            {"source_id": "concept_a", "target_id": "concept_b", "relation": "PREREQUISITE_OF"},
+            {"source_id": "concept_b", "target_id": "concept_c", "relation": "PREREQUISITE_OF"},
+        ]
+        invalid, issues = check_contradictory_edges(edges)
+        assert len(invalid) == 0
         assert len(issues) == 0
