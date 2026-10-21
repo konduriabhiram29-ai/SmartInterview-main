@@ -59,6 +59,9 @@ export const chatApi = {
   publishResult: (groupId, shareId, userId) =>
     api.post(`/chat/groups/${groupId}/interviews/${shareId}/publish/${userId}`),
 
+  // WebSocket Ticket (scoped, short-lived credential)
+  getWsTicket: () => api.post('/chat/ws-ticket'),
+
   // My interviews (for share selector — reuse existing)
   getMyInterviews: () => api.get('/interviews/history'),
 };

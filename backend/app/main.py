@@ -49,11 +49,36 @@ app.include_router(chat_ws_router)
 @app.on_event("startup")
 async def startup():
     """
-    Create all new chat tables on startup (non-destructive).
-    Existing tables are untouched.
+    Validate configuration and initialize infrastructure on startup.
+    Create all new chat tables (non-destructive).
     """
+    import os
     import logging
     logger = logging.getLogger(__name__)
+
+    # Validate configuration and enforce production security gates
+    from app.config import validate_config, mask_sensitive_url, DATABASE_URL
+    cfg_report = validate_config()
+    is_prod = os.getenv("ENVIRONMENT", "").lower() == "production"
+
+    if not cfg_report["is_valid"]:
+        if is_prod:
+            for finding in cfg_report["findings"]:
+                logger.critical("Startup configuration failure: %s", finding)
+            raise RuntimeError(f"Startup aborted due to critical configuration errors: {cfg_report['findings']}")
+        else:
+            for finding in cfg_report["findings"]:
+                logger.warning("Configuration finding: %s", finding)
+
+    for warning in cfg_report.get("warnings", []):
+        logger.warning("Configuration warning: %s", warning)
+
+    logger.info(
+        "Application starting up: env=%s, rag_mode=%s, db=%s",
+        cfg_report.get("environment"),
+        cfg_report.get("rag_mode"),
+        cfg_report.get("masked_database_url", mask_sensitive_url(DATABASE_URL)),
+    )
 
     from app.database import engine
     from app.models.chat import (
@@ -75,6 +100,7 @@ async def startup():
     # Initialize Redis connection
     from app.services.redis_service import get_redis
     await get_redis()
+
 
     # Verify knowledge graph initialization (guarantees readiness before requests)
     try:

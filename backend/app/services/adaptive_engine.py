@@ -66,6 +66,7 @@ class SkillPerformance:
     current_bloom_order: int = 1          # starts at Remember
     current_difficulty: str = "medium"    # will be overridden by session config
     scores: list[float] = field(default_factory=list)
+    concept_mastery: dict[str, float] = field(default_factory=dict)
 
     @property
     def average_score(self) -> float:
@@ -73,19 +74,49 @@ class SkillPerformance:
             return 0.0
         return self.total_score / self.attempts
 
-    def record_score(self, score: float):
-        """Record a new evaluation score for this skill."""
+    @property
+    def mastery_score(self) -> float:
+        """
+        Calculates moving-average mastery estimate.
+        Weights latest score 65% and historical average 35% to smooth noisy individual answers.
+        """
+        if self.attempts == 0:
+            return 0.0
+        if self.attempts == 1:
+            return self.scores[0]
+        latest = self.scores[-1]
+        prior_avg = (self.total_score - latest) / (self.attempts - 1)
+        return round(0.65 * latest + 0.35 * prior_avg, 2)
+
+    def record_score(self, score: float, concept: Optional[str] = None):
+        """Record a new evaluation score for this skill and optional concept."""
         self.attempts += 1
         clamped = max(0.0, min(100.0, score))
         self.total_score += clamped
         self.scores.append(clamped)
+        if concept:
+            c_norm = concept.strip().lower()
+            if c_norm in self.concept_mastery:
+                self.concept_mastery[c_norm] = round(0.6 * clamped + 0.4 * self.concept_mastery[c_norm], 2)
+            else:
+                self.concept_mastery[c_norm] = clamped
 
     def to_dict(self) -> dict:
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict) -> SkillPerformance:
-        return cls(**data)
+        clean_data = {
+            "skill": data.get("skill", ""),
+            "attempts": data.get("attempts", 0),
+            "total_score": data.get("total_score", 0.0),
+            "current_bloom_order": data.get("current_bloom_order", 1),
+            "current_difficulty": data.get("current_difficulty", "medium"),
+            "scores": data.get("scores", []),
+            "concept_mastery": data.get("concept_mastery", {}),
+        }
+        return cls(**clean_data)
+
 
 
 # ── Adaptive State ────────────────────────────────────────────
@@ -215,14 +246,22 @@ def initialize_state(
 
 # ── Core Adaptive Logic ──────────────────────────────────────
 
-def decide_next(state: AdaptiveState, overall_score: float) -> AdaptiveDecision:
+def decide_next(
+    state: AdaptiveState,
+    overall_score: float,
+    concept: Optional[str] = None,
+    use_mastery_smoothing: bool = False,
+) -> AdaptiveDecision:
     """
-    Deterministic adaptive decision based on the latest evaluation score.
+    Deterministic adaptive decision based on the evaluation score.
 
     Rules:
         Score >= 80  → advance Bloom level (if max Bloom, advance difficulty)
         Score 50–79  → maintain current level
         Score < 50   → regress Bloom level (if min Bloom, reduce difficulty if possible)
+
+    When use_mastery_smoothing=True, utilizes historical moving-average mastery
+    rather than isolated noisy scores to stabilize progression across multiple attempts.
 
     Returns an AdaptiveDecision with the next skill, bloom, difficulty, and question type.
     """
@@ -230,17 +269,20 @@ def decide_next(state: AdaptiveState, overall_score: float) -> AdaptiveDecision:
     current_skill = state.current_skill
     perf = state.get_skill_performance(current_skill)
 
-    # Record the score
-    perf.record_score(overall_score)
+    # Record the score and optional concept mastery
+    perf.record_score(overall_score, concept=concept)
 
     current_bloom = get_bloom_level(state.current_bloom_id)
     current_difficulty = state.current_difficulty
+
+    # Determine progression score: smoothed mastery or raw single score
+    progression_score = perf.mastery_score if (use_mastery_smoothing and perf.attempts > 1) else overall_score
 
     # ── Apply deterministic rules ──
     new_bloom = current_bloom
     new_difficulty = current_difficulty
 
-    if overall_score >= ADVANCE_THRESHOLD:
+    if progression_score >= ADVANCE_THRESHOLD:
         # Try to advance Bloom level
         higher = next_level(current_bloom)
         if higher is not None:
@@ -249,7 +291,7 @@ def decide_next(state: AdaptiveState, overall_score: float) -> AdaptiveDecision:
             # Already at Create — advance difficulty instead
             new_difficulty = _next_difficulty(current_difficulty)
 
-    elif overall_score < MAINTAIN_LOWER:
+    elif progression_score < MAINTAIN_LOWER:
         # Try to regress Bloom level
         lower = prev_level(current_bloom)
         if lower is not None:
@@ -258,6 +300,7 @@ def decide_next(state: AdaptiveState, overall_score: float) -> AdaptiveDecision:
             # Already at Remember — lower difficulty if possible
             new_difficulty = _prev_difficulty(current_difficulty)
     # else: 50-79 → maintain current level (no changes)
+
 
     # Update skill performance state
     perf.current_bloom_order = new_bloom.order

@@ -39,7 +39,7 @@ from app.schemas.chat import (
     PublishResultRequest,
 )
 from app.services import chat_service, redis_service
-from app.services.chat_websocket import handle_chat_websocket, manager
+from app.services.chat_websocket import handle_chat_websocket, manager, generate_ws_ticket
 from app.services.chat_service import (
     create_group, get_user_groups, get_group_detail, update_group, delete_group,
     add_members, remove_member, leave_group, promote_to_admin, demote_from_admin,
@@ -54,19 +54,33 @@ ws_router = APIRouter(tags=["chat-ws"])
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# WebSocket
+# WebSocket & Ticket Authentication
 # ─────────────────────────────────────────────────────────────────────────────
 
 @ws_router.websocket("/ws/chat")
 async def chat_websocket_endpoint(
     websocket: WebSocket,
     token: Optional[str] = Query(default=None),
+    ticket: Optional[str] = Query(default=None),
 ):
     """
     WebSocket endpoint for real-time chat.
-    Authentication: pass JWT as query param ?token=<JWT>
+    Authentication: pass short-lived ticket ?ticket=<ticket> (recommended)
+    or JWT query param ?token=<JWT> (legacy fallback).
     """
-    await handle_chat_websocket(websocket, token or "")
+    await handle_chat_websocket(websocket, token=token, ticket=ticket)
+
+
+@router.post("/ws-ticket")
+def issue_ws_ticket(
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Issue a short-lived (60s), single-use scoped WebSocket ticket.
+    Protects long-lived JWTs from being exposed in browser history or proxy URLs.
+    """
+    ticket = generate_ws_ticket(current_user.id)
+    return {"ticket": ticket, "expires_in": 60}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -341,7 +355,14 @@ def link_attempt_session(
     db: Session = Depends(get_db),
 ):
     """After calling /api/interviews/start, link the new session_id to the attempt."""
-    attempt = link_attempt_to_session(db, attempt_id, interview_session_id)
+    attempt = link_attempt_to_session(
+        db,
+        attempt_id,
+        interview_session_id,
+        user_id=current_user.id,
+        group_id=group_id,
+        share_id=share_id,
+    )
     return {
         "attempt_id": attempt.id,
         "interview_session_id": attempt.interview_session_id,

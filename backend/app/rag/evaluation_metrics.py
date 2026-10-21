@@ -35,13 +35,29 @@ from app.rag.retrieval_result import RetrievalResult
 
 # ── 1. Ranking & Retrieval Metrics ────────────────────────────────────
 
+def _dedup_top_k(retrieved_ids: Sequence[str], k: int) -> List[str]:
+    """Helper to deduplicate retrieved IDs while strictly preserving rank order up to cutoff k."""
+    if k <= 0:
+        return []
+    seen: Set[str] = set()
+    deduped: List[str] = []
+    for cid in retrieved_ids:
+        if cid not in seen:
+            seen.add(cid)
+            deduped.append(cid)
+        if len(deduped) == k:
+            break
+    return deduped
+
+
 def hit_at_k(retrieved_ids: Sequence[str], ground_truth_ids: Set[str], k: int = 5) -> float:
     """
     Compute binary Hit@k: 1.0 if at least one ground-truth item is in top-k, else 0.0.
+    Handles duplicate IDs, empty lists, empty ground truth, and non-positive k safely.
     """
     if k <= 0 or not retrieved_ids or not ground_truth_ids:
         return 0.0
-    top_slice = retrieved_ids[:k]
+    top_slice = _dedup_top_k(retrieved_ids, k)
     for cid in top_slice:
         if cid in ground_truth_ids:
             return 1.0
@@ -51,45 +67,87 @@ def hit_at_k(retrieved_ids: Sequence[str], ground_truth_ids: Set[str], k: int = 
 def recall_at_k(retrieved_ids: Sequence[str], ground_truth_ids: Set[str], k: int = 5) -> float:
     """
     Compute Recall@k: fraction of relevant items that appear in the top-k results.
+    Deduplicates retrieved IDs so repeats cannot falsely inflate hits.
     """
     if k <= 0 or not retrieved_ids or not ground_truth_ids:
         return 0.0
-    top_slice = set(retrieved_ids[:k])
-    hits = len(top_slice.intersection(ground_truth_ids))
+    top_slice = _dedup_top_k(retrieved_ids, k)
+    hits = sum(1 for cid in top_slice if cid in ground_truth_ids)
     return float(hits / len(ground_truth_ids))
 
 
-def precision_at_k(retrieved_ids: Sequence[str], ground_truth_ids: Set[str], k: int = 5) -> float:
+def precision_at_k(
+    retrieved_ids: Sequence[str],
+    ground_truth_ids: Set[str],
+    k: int = 5,
+    conventional: bool = True,
+) -> float:
     """
-    Compute Precision@k: fraction of top-k retrieved items that are relevant.
+    Compute Precision@k.
+
+    Parameters
+    ----------
+    retrieved_ids : Sequence[str]
+        Ordered sequence of retrieved candidate IDs.
+    ground_truth_ids : Set[str]
+        Set of known relevant IDs.
+    k : int, default 5
+        Rank cutoff.
+    conventional : bool, default True
+        If True (standard IR definition), divides by k: hits / k.
+        When fewer than k items are returned, unreturned slots count as non-relevant.
+        If False, divides by len(returned[:k]): hits / len(returned[:k]).
     """
     if k <= 0 or not retrieved_ids or not ground_truth_ids:
         return 0.0
-    top_slice = retrieved_ids[:k]
+    top_slice = _dedup_top_k(retrieved_ids, k)
     hits = sum(1 for cid in top_slice if cid in ground_truth_ids)
-    return float(hits / len(top_slice))
+    denominator = k if conventional else len(top_slice)
+    if denominator <= 0:
+        return 0.0
+    return float(hits / denominator)
+
+
+def precision_among_returned_at_k(
+    retrieved_ids: Sequence[str],
+    ground_truth_ids: Set[str],
+    k: int = 5,
+) -> float:
+    """
+    Compute precision among returned results up to rank k: hits / len(returned[:k]).
+    Distinct from conventional Precision@k which divides by k.
+    """
+    return precision_at_k(retrieved_ids, ground_truth_ids, k=k, conventional=False)
 
 
 def reciprocal_rank(retrieved_ids: Sequence[str], ground_truth_ids: Set[str]) -> float:
     """
     Compute Reciprocal Rank: 1 / rank of the first relevant retrieved item, or 0.0.
+    Rank is 1-indexed over deduplicated candidate list.
     """
     if not retrieved_ids or not ground_truth_ids:
         return 0.0
-    for rank, cid in enumerate(retrieved_ids, 1):
+    seen: Set[str] = set()
+    rank = 1
+    for cid in retrieved_ids:
+        if cid in seen:
+            continue
+        seen.add(cid)
         if cid in ground_truth_ids:
             return 1.0 / rank
+        rank += 1
     return 0.0
 
 
 def average_precision_at_k(retrieved_ids: Sequence[str], ground_truth_ids: Set[str], k: int = 5) -> float:
     """
     Compute Average Precision at k (AP@k) for a single query.
+    Deduplicates retrieved candidates before calculating precision at each relevant cut.
     """
     if k <= 0 or not retrieved_ids or not ground_truth_ids:
         return 0.0
 
-    top_slice = retrieved_ids[:k]
+    top_slice = _dedup_top_k(retrieved_ids, k)
     num_relevant = 0
     precision_sum = 0.0
 
@@ -107,11 +165,12 @@ def average_precision_at_k(retrieved_ids: Sequence[str], ground_truth_ids: Set[s
 def ndcg_at_k(retrieved_ids: Sequence[str], ground_truth_ids: Set[str], k: int = 5) -> float:
     """
     Compute Normalized Discounted Cumulative Gain at k (NDCG@k) using binary relevance.
+    Deduplicates candidates and computes discounted gain against ideal ranking.
     """
     if k <= 0 or not retrieved_ids or not ground_truth_ids:
         return 0.0
 
-    top_slice = retrieved_ids[:k]
+    top_slice = _dedup_top_k(retrieved_ids, k)
     dcg = 0.0
     for rank, cid in enumerate(top_slice, 1):
         if cid in ground_truth_ids:
@@ -127,6 +186,7 @@ def ndcg_at_k(retrieved_ids: Sequence[str], ground_truth_ids: Set[str], k: int =
     if idcg == 0.0:
         return 0.0
     return float(dcg / idcg)
+
 
 
 # ── 2. Graph & Concept Metrics ────────────────────────────────────────

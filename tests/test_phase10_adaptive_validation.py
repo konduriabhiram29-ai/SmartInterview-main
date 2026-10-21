@@ -352,3 +352,62 @@ class TestSessionSummaryAndRecommendations:
         sql_rec = next(r for r in recs if r["skill"] == "SQL")
         assert sql_rec["priority"] == "high"
         assert "significant improvement" in sql_rec["message"]
+
+
+
+# ── 6. Section 15 Mastery Smoothing & Boundary Value Tests ────────────
+
+class TestMasteryAndBoundaryProgression:
+    def test_exact_threshold_boundary_decisions(self):
+        state = initialize_state(["OS"], "medium", "conceptual", 10)
+
+        # Boundary 1: Exactly 80.0 -> Must advance
+        d1 = decide_next(state, overall_score=80.0)
+        assert d1.bloom_level.order == 2  # Advanced from 1 to 2
+
+        # Boundary 2: Exactly 50.0 -> Must maintain
+        d2 = decide_next(state, overall_score=50.0)
+        assert d2.bloom_level.order == 2  # Maintained at 2
+
+        # Boundary 3: Just below 50.0 (49.9) -> Must regress
+        d3 = decide_next(state, overall_score=49.9)
+        assert d3.bloom_level.order == 1  # Regressed back to 1
+
+    def test_mastery_smoothing_prevents_isolated_dip_regression(self):
+        state = initialize_state(["DBMS"], "medium", "conceptual", 10)
+        perf = state.get_skill_performance("DBMS")
+
+        # Candidate had two strong attempts: 90 and 85 (average 87.5)
+        perf.record_score(90.0, concept="Indexing")
+        perf.record_score(85.0, concept="B-Trees")
+        perf.current_bloom_order = 3  # Apply
+        state.update_skill_performance(perf)
+        state.current_bloom_id = "apply"
+
+        # Attempt 3: Candidate has an isolated noisy dip (48.0, just below 50)
+        # Without smoothing: would immediately regress Apply -> Understand.
+        # With smoothing: effective_score = 0.65 * 48.0 + 0.35 * 87.5 = 31.2 + 30.625 = 61.82 (in maintain band 50-79)
+        decision = decide_next(state, overall_score=48.0, concept="Indexing", use_mastery_smoothing=True)
+        assert decision.bloom_level.order == 3  # Level maintained, protected against noise!
+
+    def test_mastery_smoothing_regresses_on_persistent_failure(self):
+        state = initialize_state(["DBMS"], "medium", "conceptual", 10)
+        perf = state.get_skill_performance("DBMS")
+
+        # Candidate had two weak attempts: 40 and 45
+        perf.record_score(40.0)
+        perf.record_score(45.0)
+        perf.current_bloom_order = 2  # Understand
+        state.update_skill_performance(perf)
+        state.current_bloom_id = "understand"
+
+        # Attempt 3: 35.0 -> Genuine failure
+        decision = decide_next(state, overall_score=35.0, use_mastery_smoothing=True)
+        assert decision.bloom_level.order == 1  # Properly regressed to Remember
+
+    def test_first_attempt_insufficient_history_uses_raw_score(self):
+        state = initialize_state(["Networks"], "medium", "conceptual", 10)
+        # First attempt (attempts == 0 before call): raw score is used directly
+        decision = decide_next(state, overall_score=85.0, use_mastery_smoothing=True)
+        assert decision.bloom_level.order == 2
+

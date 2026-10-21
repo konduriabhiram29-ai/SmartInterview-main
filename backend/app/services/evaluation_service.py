@@ -26,11 +26,16 @@ Voice/STT evaluation is NOT part of this service — deferred to Week 11.
 
 import json
 import os
+import time
+import logging
 import numpy as np
 from dataclasses import dataclass, field
 from typing import Optional
 
 from app.config import PROMPTS_FILE
+
+logger = logging.getLogger(__name__)
+
 
 
 # ── Scoring Weights (documented) ─────────────────────────────
@@ -219,26 +224,34 @@ def _llm_evaluate(
         reference_context=reference_context if reference_context else "No reference context available.",
     )
 
-    try:
-        response = groq_client.chat.completions.create(
-            model=groq_model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            temperature=0.3,  # lower temperature for more consistent evaluation
-            max_tokens=1200,
-        )
+    max_retries = 2
+    for attempt in range(max_retries + 1):
+        try:
+            response = groq_client.chat.completions.create(
+                model=groq_model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=0.3,  # lower temperature for more consistent evaluation
+                max_tokens=1200,
+                timeout=30.0,
+            )
 
-        text = response.choices[0].message.content
-        if not text or not text.strip():
-            return _safe_defaults("Empty LLM response")
+            text = response.choices[0].message.content
+            if not text or not text.strip():
+                return _safe_defaults("Empty LLM response")
 
-        return _parse_evaluation_json(text.strip())
+            return _parse_evaluation_json(text.strip())
 
-    except Exception as e:
-        print(f"[EvaluationService] LLM evaluation error: {e}")
-        return _safe_defaults(f"LLM evaluation failed: {str(e)[:100]}")
+        except Exception as e:
+            if attempt < max_retries:
+                backoff = (0.5 * (2 ** attempt)) + 0.1
+                time.sleep(backoff)
+                continue
+            logger.warning("[EvaluationService] LLM evaluation error after %d retries: %s", max_retries, e)
+            return _safe_defaults(f"LLM evaluation failed: {str(e)[:100]}")
+
 
 
 def _parse_evaluation_json(text: str) -> dict:

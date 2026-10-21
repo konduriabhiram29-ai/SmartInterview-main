@@ -17,9 +17,9 @@
     "hit@3": 100.0,
     "hit@5": 100.0,
     "mrr": 0.9798,
-    "mean_latency_ms": 19.47,
-    "p50_latency_ms": 6.85,
-    "p95_latency_ms": 25.33
+    "mean_latency_ms": 17.59,
+    "p50_latency_ms": 7.99,
+    "p95_latency_ms": 13.03
   },
   "query_evaluations": [
     {
@@ -27,7 +27,7 @@
       "query": "What is the Domain Name System?",
       "expected_domain": "cn",
       "expected_concept": "dns",
-      "latency_ms": 384.99,
+      "latency_ms": 321.11,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -83,7 +83,7 @@
       "query": "How is HTTP different from HTTPS?",
       "expected_domain": "cn",
       "expected_concept": "http-vs-https",
-      "latency_ms": 25.33,
+      "latency_ms": 13.03,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -139,7 +139,7 @@
       "query": "What are the key differences between TCP and UDP protocols?",
       "expected_domain": "cn",
       "expected_concept": "tcp-vs-udp",
-      "latency_ms": 15.23,
+      "latency_ms": 7.25,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -195,7 +195,7 @@
       "query": "Explain the 7 layers of the OSI model.",
       "expected_domain": "cn",
       "expected_concept": "osi-model",
-      "latency_ms": 6.43,
+      "latency_ms": 8.4,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -251,7 +251,7 @@
       "query": "What are the ACID properties in database transactions?",
       "expected_domain": "dbms",
       "expected_concept": "acid-properties",
-      "latency_ms": 6.85,
+      "latency_ms": 8.67,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -307,7 +307,7 @@
       "query": "Why do we use indexing in SQL databases?",
       "expected_domain": "dbms",
       "expected_concept": "indexing",
-      "latency_ms": 6.64,
+      "latency_ms": 7.23,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -363,7 +363,7 @@
       "query": "Explain primary keys and foreign keys.",
       "expected_domain": "dbms",
       "expected_concept": "keys",
-      "latency_ms": 6.34,
+      "latency_ms": 6.28,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -419,7 +419,7 @@
       "query": "What is database normalization and why is it used?",
       "expected_domain": "dbms",
       "expected_concept": "normalization",
-      "latency_ms": 6.57,
+      "latency_ms": 6.65,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -475,7 +475,7 @@
       "query": "How does the Factory design pattern work?",
       "expected_domain": "design-patterns",
       "expected_concept": "factory",
-      "latency_ms": 6.55,
+      "latency_ms": 9.65,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -531,7 +531,7 @@
       "query": "What is the Observer pattern and how does it use publish-subscribe?",
       "expected_domain": "design-patterns",
       "expected_concept": "observer",
-      "latency_ms": 7.75,
+      "latency_ms": 10.86,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -587,7 +587,7 @@
       "query": "When should you use the Singleton pattern?",
       "expected_domain": "design-patterns",
       "expected_concept": "singleton",
-      "latency_ms": 6.44,
+      "latency_ms": 6.72,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -643,7 +643,7 @@
       "query": "Explain the Strategy design pattern.",
       "expected_domain": "design-patterns",
       "expected_concept": "strategy",
-      "latency_ms": 6.62,
+      "latency_ms": 6.96,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -699,7 +699,7 @@
       "query": "What is an array and how are elements stored in memory?",
       "expected_domain": "dsa",
       "expected_concept": "array",
-      "latency_ms": 6.49,
+      "latency_ms": 7.03,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -755,7 +755,7 @@
       "query": "How does a hash table resolve collisions?",
       "expected_domain": "dsa",
       "expected_concept": "hash-table",
-      "latency_ms": 6.5,
+      "latency_ms": 8.87,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -811,7 +811,7 @@
       "query": "What is the difference between a stack and a queue?",
       "expected_domain": "dsa",
       "expected_concept": "stack",
-      "latency_ms": 6.59,
+      "latency_ms": 9.66,
       "first_correct_rank": 3,
       "reciprocal_rank": 0.3333,
       "retrieved_chunks": [
@@ -867,7 +867,7 @@
       "query": "How does a binary search tree work?",
       "expected_domain": "dsa",
       "expected_concept": "tree",
-      "latency_ms": 6.8,
+      "latency_ms": 11.15,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -923,7 +923,7 @@
       "query": "What is dynamic programming?",
       "expected_domain": "dsa",
       "expected_concept": "dynamic-programming",
-      "latency_ms": 7.98,
+      "latency_ms": 8.3,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -979,7 +979,7 @@
       "query": "Explain the bias-variance tradeoff in machine learning.",
       "expected_domain": "ml-dl",
       "expected_concept": "bias-variance-tradeoff",
-      "latency_ms": 6.6,
+      "latency_ms": 8.43,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -1035,7 +1035,7 @@
       "query": "What is the difference between linear regression and logistic regression?",
       "expected_domain": "ml-dl",
       "expected_concept": "linear-vs-logistic-regression",
-      "latency_ms": 7.58,
+      "latency_ms": 8.53,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -1091,7 +1091,7 @@
       "query": "How do decision trees work in classification?",
       "expected_domain": "ml-dl",
       "expected_concept": "decision-trees",
-      "latency_ms": 7.43,
+      "latency_ms": 7.08,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -1147,7 +1147,7 @@
       "query": "What causes overfitting in a neural network model?",
       "expected_domain": "ml-dl",
       "expected_concept": "overfitting-vs-underfitting",
-      "latency_ms": 6.46,
+      "latency_ms": 7.49,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -1203,7 +1203,7 @@
       "query": "What is the concept of encapsulation in object-oriented programming?",
       "expected_domain": "oop",
       "expected_concept": "encapsulation",
-      "latency_ms": 7.1,
+      "latency_ms": 9.26,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -1259,7 +1259,7 @@
       "query": "Explain polymorphism with an example.",
       "expected_domain": "oop",
       "expected_concept": "polymorphism",
-      "latency_ms": 7.79,
+      "latency_ms": 8.98,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -1315,7 +1315,7 @@
       "query": "Why should we prefer composition over inheritance?",
       "expected_domain": "oop",
       "expected_concept": "composition-inheritance",
-      "latency_ms": 6.34,
+      "latency_ms": 6.56,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -1371,7 +1371,7 @@
       "query": "What is abstraction in OOP?",
       "expected_domain": "oop",
       "expected_concept": "abstraction",
-      "latency_ms": 6.35,
+      "latency_ms": 6.55,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -1427,7 +1427,7 @@
       "query": "What are the four necessary conditions for a deadlock to occur?",
       "expected_domain": "os",
       "expected_concept": "deadlock",
-      "latency_ms": 7.73,
+      "latency_ms": 6.78,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -1483,7 +1483,7 @@
       "query": "What is the difference between a mutex and a semaphore?",
       "expected_domain": "os",
       "expected_concept": "mutex-vs-semaphore",
-      "latency_ms": 11.15,
+      "latency_ms": 6.87,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -1539,7 +1539,7 @@
       "query": "How is a process different from a thread?",
       "expected_domain": "os",
       "expected_concept": "process-vs-thread",
-      "latency_ms": 8.89,
+      "latency_ms": 8.81,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -1595,7 +1595,7 @@
       "query": "What is virtual memory and paging?",
       "expected_domain": "os",
       "expected_concept": "virtual-memory",
-      "latency_ms": 7.74,
+      "latency_ms": 6.73,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -1651,7 +1651,7 @@
       "query": "Why do we use caching in distributed systems?",
       "expected_domain": "system-design",
       "expected_concept": "caching",
-      "latency_ms": 9.57,
+      "latency_ms": 7.66,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -1707,7 +1707,7 @@
       "query": "Explain the CAP theorem.",
       "expected_domain": "system-design",
       "expected_concept": "cap-theorem",
-      "latency_ms": 7.96,
+      "latency_ms": 7.99,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -1763,7 +1763,7 @@
       "query": "How does consistent hashing help with load balancing?",
       "expected_domain": "system-design",
       "expected_concept": "consistent-hashing",
-      "latency_ms": 6.8,
+      "latency_ms": 6.85,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [
@@ -1819,7 +1819,7 @@
       "query": "What are the benefits of microservices over monoliths?",
       "expected_domain": "system-design",
       "expected_concept": "microservices-vs-monolith",
-      "latency_ms": 7.08,
+      "latency_ms": 8.14,
       "first_correct_rank": 1,
       "reciprocal_rank": 1.0,
       "retrieved_chunks": [

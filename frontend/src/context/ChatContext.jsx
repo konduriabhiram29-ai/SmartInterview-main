@@ -49,9 +49,12 @@ function computeBackoff(attempt) {
   return Math.min(BACKOFF_BASE_MS * Math.pow(2, attempt), BACKOFF_MAX_MS);
 }
 
-function getWsUrl(token) {
+function getWsUrl({ token, ticket }) {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   const host = window.location.host;
+  if (ticket) {
+    return `${protocol}//${host}/ws/chat?ticket=${encodeURIComponent(ticket)}`;
+  }
   return `${protocol}//${host}/ws/chat?token=${encodeURIComponent(token)}`;
 }
 
@@ -251,7 +254,7 @@ export function ChatProvider({ children }) {
     }
   }, [user?.id, selectedGroupId, loadGroups]);
 
-  const connectWs = useCallback(() => {
+  const connectWs = useCallback(async () => {
     if (!isAuthenticated || isConnecting.current) return;
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -259,7 +262,15 @@ export function ChatProvider({ children }) {
     isConnecting.current = true;
     setWsStatus('connecting');
 
-    const ws = new WebSocket(getWsUrl(token));
+    let ticket = null;
+    try {
+      const ticketRes = await chatApi.getWsTicket();
+      ticket = ticketRes.data?.ticket;
+    } catch {
+      // Fallback to legacy token param
+    }
+
+    const ws = new WebSocket(getWsUrl({ token, ticket }));
     wsRef.current = ws;
 
     ws.onopen = () => {

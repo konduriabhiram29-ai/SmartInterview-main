@@ -51,14 +51,29 @@ def _tokenize(text: str) -> set[str]:
     return set(re.findall(r"[a-z0-9]+", text.lower()))
 
 
-def _term_overlap_ratio(query: str, text: str) -> float:
-    """Compute query token recall in candidate text."""
+STOP_WORDS = {
+    "a", "an", "the", "in", "on", "at", "to", "for", "of", "with",
+    "by", "from", "up", "about", "into", "over", "after", "is", "are",
+    "was", "were", "be", "been", "being", "have", "has", "had", "do",
+    "does", "did", "what", "how", "why", "which", "who", "whom", "this",
+    "that", "these", "those", "and", "or", "but", "if", "because", "as",
+}
+
+
+def _term_overlap_ratio(query: str, text: str, filter_stopwords: bool = True) -> float:
+    """Compute query token recall in candidate text, filtering non-discriminative stop words."""
     q_tokens = _tokenize(query)
     if not q_tokens:
         return 0.0
     t_tokens = _tokenize(text[:2000])
+    if filter_stopwords:
+        substantive_q = q_tokens - STOP_WORDS
+        if substantive_q:
+            substantive_t = t_tokens - STOP_WORDS
+            return len(substantive_q.intersection(substantive_t)) / len(substantive_q)
     common = q_tokens.intersection(t_tokens)
     return len(common) / len(q_tokens)
+
 
 
 def _cosine_similarity(vec_a: np.ndarray, vec_b: np.ndarray) -> float:
@@ -226,8 +241,9 @@ class SemanticEmbeddingReranker(BaseReranker):
             )
             passed = [scored[0]]
 
-        # Concept diversity: avoid crowding out prerequisites/related concepts
-        max_per_concept = kwargs.get("max_per_concept", max(1, math.ceil(top_k / 2))) if kwargs.get("diverse", True) else top_k
+        # Concept diversity: avoid crowding out prerequisites/related concepts if explicit diverse=True requested
+        diverse = kwargs.get("diverse", False)
+        max_per_concept = kwargs.get("max_per_concept", max(1, math.ceil(top_k / 2))) if diverse else top_k
         concept_counts: Dict[str, int] = {}
         selected_items: List[Tuple[float, int, RetrievalResult]] = []
 

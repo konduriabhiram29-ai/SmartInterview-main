@@ -181,7 +181,9 @@ def run_benchmark():
                     query=sc["query"],
                     results=raw_res,
                     top_k=3,
+                    diverse=True,
                 )
+
             else:
                 final_res = ret_obj.retrieve(
                     query=sc["query"],

@@ -130,7 +130,7 @@ def create_group(db: Session, creator_id: int, req: CreateGroupRequest) -> ChatG
 
 
 def get_user_groups(db: Session, user_id: int, online_ids: set = None) -> list[dict]:
-    """Return all active groups the user belongs to, with unread counts."""
+    """Return all active groups the user belongs to, with unread counts (batched to prevent N+1 queries)."""
     memberships = (
         db.query(ChatGroupMember)
         .filter(
@@ -139,38 +139,55 @@ def get_user_groups(db: Session, user_id: int, online_ids: set = None) -> list[d
         )
         .all()
     )
+    if not memberships:
+        return []
+
+    active_memberships = [m for m in memberships if m.group and m.group.is_active]
+    if not active_memberships:
+        return []
+
+    group_ids = [m.group_id for m in active_memberships]
+
+    # 1. Batch member counts
+    member_count_rows = (
+        db.query(ChatGroupMember.group_id, sqlfunc.count(ChatGroupMember.id))
+        .filter(ChatGroupMember.group_id.in_(group_ids), ChatGroupMember.is_active == True)
+        .group_by(ChatGroupMember.group_id)
+        .all()
+    )
+    member_counts = dict(member_count_rows)
+
+    # 2. Batch member IDs for online count
+    member_id_rows = (
+        db.query(ChatGroupMember.group_id, ChatGroupMember.user_id)
+        .filter(ChatGroupMember.group_id.in_(group_ids), ChatGroupMember.is_active == True)
+        .all()
+    )
+    group_member_ids: dict[int, set[int]] = {}
+    for gid, uid in member_id_rows:
+        group_member_ids.setdefault(gid, set()).add(uid)
+
+    # 3. Batch latest message per group
+    max_msg_rows = (
+        db.query(ChatMessage.group_id, sqlfunc.max(ChatMessage.id))
+        .filter(ChatMessage.group_id.in_(group_ids), ChatMessage.deleted_at == None)
+        .group_by(ChatMessage.group_id)
+        .all()
+    )
+    latest_msg_ids = [mid for _, mid in max_msg_rows if mid is not None]
+    last_messages = {}
+    if latest_msg_ids:
+        msgs = db.query(ChatMessage).filter(ChatMessage.id.in_(latest_msg_ids)).all()
+        for msg in msgs:
+            last_messages[msg.group_id] = msg
+
     result = []
-    for m in memberships:
+    for m in active_memberships:
         group = m.group
-        if not group or not group.is_active:
-            continue
-        # Last message
-        last_msg = (
-            db.query(ChatMessage)
-            .filter(
-                ChatMessage.group_id == group.id,
-                ChatMessage.deleted_at == None,
-            )
-            .order_by(ChatMessage.created_at.desc())
-            .first()
-        )
-        # Member count
-        member_count = (
-            db.query(ChatGroupMember)
-            .filter(
-                ChatGroupMember.group_id == group.id,
-                ChatGroupMember.is_active == True,
-            )
-            .count()
-        )
-        # Online count (approximate)
-        member_ids = [
-            row.user_id
-            for row in db.query(ChatGroupMember.user_id)
-            .filter(ChatGroupMember.group_id == group.id, ChatGroupMember.is_active == True)
-            .all()
-        ]
-        online_count = len(online_ids & set(member_ids)) if online_ids else 0
+        last_msg = last_messages.get(group.id)
+        member_count = member_counts.get(group.id, 0)
+        member_ids = group_member_ids.get(group.id, set())
+        online_count = len(online_ids & member_ids) if online_ids else 0
 
         result.append({
             "id": group.id,
@@ -186,6 +203,7 @@ def get_user_groups(db: Session, user_id: int, online_ids: set = None) -> list[d
             "unread_count": _get_unread_count(db, m),
             "last_message": _message_to_response(last_msg) if last_msg else None,
         })
+
     # Sort by last message timestamp descending
     result.sort(
         key=lambda g: g["last_message"]["created_at"] if g["last_message"] else g["created_at"].isoformat(),
@@ -554,11 +572,40 @@ def link_attempt_to_session(
     db: Session,
     attempt_id: int,
     interview_session_id: int,
+    user_id: Optional[int] = None,
+    group_id: Optional[int] = None,
+    share_id: Optional[int] = None,
 ) -> GroupInterviewAttempt:
-    """Link an attempt to the actual interview session that was created."""
-    attempt = db.query(GroupInterviewAttempt).filter(GroupInterviewAttempt.id == attempt_id).first()
+    """
+    Link an attempt to the actual interview session that was created.
+    Security: Strictly verifies that attempt belongs to the requesting user and group,
+    and that the session belongs to the candidate.
+    """
+    query = db.query(GroupInterviewAttempt).filter(GroupInterviewAttempt.id == attempt_id)
+    if user_id is not None:
+        query = query.filter(GroupInterviewAttempt.user_id == user_id)
+    if share_id is not None:
+        query = query.filter(GroupInterviewAttempt.share_id == share_id)
+    attempt = query.first()
     if not attempt:
-        raise HTTPException(status_code=404, detail="Attempt not found.")
+        raise HTTPException(status_code=404, detail="Attempt not found or access denied.")
+
+    if group_id is not None:
+        require_group_exists(db, group_id)
+        if user_id is not None:
+            require_membership(db, user_id, group_id)
+        if attempt.share and attempt.share.group_id != group_id:
+            raise HTTPException(status_code=400, detail="Attempt does not belong to specified group.")
+
+    # Verify interview session exists and belongs to user if user_id is provided
+    if user_id is not None:
+        session = db.query(InterviewSession).filter(
+            InterviewSession.id == interview_session_id,
+            InterviewSession.user_id == user_id,
+        ).first()
+        if not session:
+            raise HTTPException(status_code=404, detail="Interview session not found or does not belong to user.")
+
     attempt.interview_session_id = interview_session_id
     attempt.status = AttemptStatus.IN_PROGRESS
     db.commit()
@@ -586,7 +633,7 @@ def get_share_results(
     group_id: int,
     share_id: int,
 ) -> dict:
-    """Return all candidate results for a shared interview (admin only)."""
+    """Return all candidate results for a shared interview (admin only, batched queries)."""
     require_group_exists(db, group_id)
     require_admin(db, admin_id, group_id)
 
@@ -598,9 +645,9 @@ def get_share_results(
         raise HTTPException(status_code=404, detail="Interview share not found.")
 
     session = share.interview_session
-    skill_label = ", ".join(session.selected_skills or []) if session.selected_skills else "General"
+    skill_label = ", ".join(session.selected_skills or []) if session and session.selected_skills else "General"
 
-    # Get all group members
+    # Get all active group members
     members = (
         db.query(ChatGroupMember)
         .filter(
@@ -610,13 +657,31 @@ def get_share_results(
         .all()
     )
 
+    # 1. Batch load attempts for this share
+    attempts = (
+        db.query(GroupInterviewAttempt)
+        .filter(GroupInterviewAttempt.share_id == share_id)
+        .all()
+    )
+    attempts_by_user = {a.user_id: a for a in attempts}
+
+    # 2. Batch load all answer evaluations for all attempts
+    session_ids = [a.interview_session_id for a in attempts if a.interview_session_id]
+    evals_by_session: dict[int, list[AnswerEvaluation]] = {}
+    if session_ids:
+        eval_rows = (
+            db.query(AnswerEvaluation, Answer.session_id)
+            .join(Answer, AnswerEvaluation.answer_id == Answer.id)
+            .filter(Answer.session_id.in_(session_ids))
+            .all()
+        )
+        for ev, sid in eval_rows:
+            evals_by_session.setdefault(sid, []).append(ev)
+
     candidates = []
     for m in members:
         user = m.user
-        attempt = db.query(GroupInterviewAttempt).filter(
-            GroupInterviewAttempt.share_id == share_id,
-            GroupInterviewAttempt.user_id == m.user_id,
-        ).first()
+        attempt = attempts_by_user.get(m.user_id)
 
         result: CandidateResult = {
             "user_id": m.user_id,
@@ -632,13 +697,7 @@ def get_share_results(
         }
 
         if attempt and attempt.interview_session_id:
-            # Compute average scores from AnswerEvaluation
-            evals = (
-                db.query(AnswerEvaluation)
-                .join(Answer, AnswerEvaluation.answer_id == Answer.id)
-                .filter(Answer.session_id == attempt.interview_session_id)
-                .all()
-            )
+            evals = evals_by_session.get(attempt.interview_session_id, [])
             if evals:
                 result["overall_score"] = round(sum(e.overall_score for e in evals) / len(evals), 1)
                 result["technical_score"] = round(sum(e.technical_score for e in evals) / len(evals), 1)

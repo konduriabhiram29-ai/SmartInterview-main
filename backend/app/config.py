@@ -100,53 +100,100 @@ RERANKER_MIN_SCORE = float(os.getenv("RERANKER_MIN_SCORE", "0.0"))
 RERANKER_TOP_K = int(os.getenv("RERANKER_TOP_K", "3"))
 
 
+import re
+from urllib.parse import urlsplit, urlunsplit
+
+def mask_sensitive_url(url: str) -> str:
+    """
+    Safely mask username:password in database/redis URLs for logging.
+    e.g. mysql+pymysql://root:password@localhost:3306/db -> mysql+pymysql://root:****@localhost:3306/db
+    """
+    if not url:
+        return ""
+    try:
+        parsed = urlsplit(url)
+        if parsed.password:
+            netloc = f"{parsed.username or ''}:****@{parsed.hostname or ''}"
+            if parsed.port:
+                netloc += f":{parsed.port}"
+            return urlunsplit((parsed.scheme, netloc, parsed.path, parsed.query, parsed.fragment))
+    except Exception:
+        pass
+    # Fallback regex masking
+    return re.sub(r"://([^:@]+):([^@]+)@", r"://\1:****@", url)
+
+
 # ── Configuration Consistency & Security Audit (Phase 11) ─
 
 def validate_config() -> dict[str, Any]:
     """
     Perform a security, consistency, and sanity audit on loaded configuration.
     Returns an audit report dictionary containing findings and status.
+    Fails fast in production when critical secrets or invariants are violated.
     """
     findings: list[str] = []
     warnings: list[str] = []
 
-    # 1. JWT Security Audit
-    is_default_secret = JWT_SECRET_KEY == "dev-secret-change-in-production"
     is_prod = os.getenv("ENVIRONMENT", "").lower() == "production"
+
+    # 1. JWT Security Audit
+    is_default_secret = JWT_SECRET_KEY in {
+        "dev-secret-change-in-production",
+        "secret",
+        "changeme",
+        "default",
+        "admin",
+    } or len(JWT_SECRET_KEY) < 16
     if is_default_secret:
         if is_prod:
-            findings.append("CRITICAL: Using default JWT_SECRET_KEY in production environment!")
+            findings.append("CRITICAL: Using default or weak JWT_SECRET_KEY in production environment!")
         else:
             warnings.append("Using default JWT_SECRET_KEY in development environment.")
+
+    if JWT_EXPIRATION_MINUTES <= 0:
+        findings.append(f"Invalid JWT_EXPIRATION_MINUTES: {JWT_EXPIRATION_MINUTES}. Must be > 0.")
 
     # 2. Database URL Audit
     if not DATABASE_URL:
         findings.append("DATABASE_URL is not configured.")
+    elif is_prod and ("root:root" in DATABASE_URL or "localhost" in DATABASE_URL):
+        warnings.append("Default local database credentials detected in production environment.")
 
-    # 3. AI / LLM Audit
+    # 3. Redis Audit
+    if not REDIS_URL and is_prod:
+        warnings.append("REDIS_URL is not configured in production environment.")
+
+    # 4. AI / LLM Audit
     if LLM_PROVIDER == "groq" and not GROQ_API_KEY:
         warnings.append("GROQ_API_KEY is not set while LLM_PROVIDER is 'groq'.")
 
-    # 4. RAG Mode Validation
+
+    # 5. RAG Mode Validation
     valid_modes = {"dense", "vector", "keyword", "bm25", "graph", "hybrid"}
     if RAG_MODE not in valid_modes:
         findings.append(f"Invalid RAG_MODE: '{RAG_MODE}'. Expected one of {sorted(valid_modes)}.")
 
-    # 5. Hybrid Weights Validation
+    # 6. Hybrid Weights Validation
     if HYBRID_FUSION_METHOD == "weighted":
         total_weight = HYBRID_VECTOR_WEIGHT + HYBRID_KEYWORD_WEIGHT + HYBRID_GRAPH_WEIGHT
         if abs(total_weight - 1.0) > 0.05:
             warnings.append(f"Hybrid retrieval weights do not sum close to 1.0 (sum={round(total_weight, 3)}).")
 
-    # 6. Storage Backend Validation
+    if HYBRID_FETCH_K <= 0:
+        findings.append(f"Invalid HYBRID_FETCH_K: {HYBRID_FETCH_K}. Must be > 0.")
+
+    # 7. Storage Backend Validation
     valid_backends = {"auto", "neo4j", "networkx"}
     if GRAPH_STORAGE_BACKEND not in valid_backends:
         findings.append(f"Invalid GRAPH_STORAGE_BACKEND: '{GRAPH_STORAGE_BACKEND}'. Expected one of {sorted(valid_backends)}.")
 
-    # 7. Reranker Backend Validation
+    # 8. Reranker Backend Validation
     valid_rerankers = {"semantic", "cross_encoder", "none", "passthrough"}
     if RERANKER_BACKEND not in valid_rerankers:
         findings.append(f"Invalid RERANKER_BACKEND: '{RERANKER_BACKEND}'. Expected one of {sorted(valid_rerankers)}.")
+
+    if RERANKER_TOP_K <= 0:
+        findings.append(f"Invalid RERANKER_TOP_K: {RERANKER_TOP_K}. Must be > 0.")
 
     is_valid = len(findings) == 0
     return {
@@ -156,7 +203,9 @@ def validate_config() -> dict[str, Any]:
         "graph_backend": GRAPH_STORAGE_BACKEND,
         "reranker_backend": RERANKER_BACKEND,
         "reranker_enabled": RERANKER_ENABLED,
+        "masked_database_url": mask_sensitive_url(DATABASE_URL),
         "findings": findings,
         "warnings": warnings,
     }
+
 

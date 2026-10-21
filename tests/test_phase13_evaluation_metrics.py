@@ -239,3 +239,83 @@ class TestEndToEndAggregation:
         assert report.mrr == 0.5
         assert report.latency["p50"] == 20.5
         assert report.to_dict()["total_queries"] == 2
+
+
+# ── 6. Metric Boundary, Deduplication & Convention Tests (Section 8) ───
+
+class TestPrecisionBoundaryAndDeduplication:
+    def test_fewer_than_k_results_conventional_vs_returned(self):
+        # 2 results returned, 1 relevant, k=5
+        retrieved = ["c1", "c2"]
+        gt = {"c1"}
+
+        # Conventional precision: 1 hit / 5 slots = 0.20
+        assert precision_at_k(retrieved, gt, k=5, conventional=True) == 0.20
+        # Precision among returned: 1 hit / 2 returned = 0.50
+        assert precision_at_k(retrieved, gt, k=5, conventional=False) == 0.50
+
+    def test_duplicate_retrieved_ids_do_not_inflate_metrics(self):
+        # Malfunctioning retriever repeats the same relevant chunk 5 times
+        duplicated = ["c1", "c1", "c1", "c1", "c1"]
+        gt = {"c1"}
+
+        # Conventional precision: deduplicated top slice has 1 item, hits=1, precision@5 = 1/5 = 0.20
+        assert precision_at_k(duplicated, gt, k=5, conventional=True) == 0.20
+        # Recall@5: 1 / 1 = 1.0 (all relevant items found, but only counted once)
+        assert recall_at_k(duplicated, gt, k=5) == 1.0
+        # MRR: 1.0
+        assert reciprocal_rank(duplicated, gt) == 1.0
+
+    def test_exactly_k_results_matches(self):
+        retrieved = ["c1", "c2", "c3"]
+        gt = {"c1", "c2"}
+        assert precision_at_k(retrieved, gt, k=3, conventional=True) == 2 / 3
+        assert precision_at_k(retrieved, gt, k=3, conventional=False) == 2 / 3
+
+    def test_no_results_empty_retrieved(self):
+        gt = {"c1", "c2"}
+        assert precision_at_k([], gt, k=5) == 0.0
+        assert recall_at_k([], gt, k=5) == 0.0
+        assert hit_at_k([], gt, k=5) == 0.0
+        assert reciprocal_rank([], gt) == 0.0
+        assert average_precision_at_k([], gt, k=5) == 0.0
+        assert ndcg_at_k([], gt, k=5) == 0.0
+
+    def test_no_known_relevant_documents(self):
+        retrieved = ["c1", "c2"]
+        empty_gt = set()
+        assert precision_at_k(retrieved, empty_gt, k=5) == 0.0
+        assert recall_at_k(retrieved, empty_gt, k=5) == 0.0
+        assert hit_at_k(retrieved, empty_gt, k=5) == 0.0
+        assert reciprocal_rank(retrieved, empty_gt) == 0.0
+        assert average_precision_at_k(retrieved, empty_gt, k=5) == 0.0
+        assert ndcg_at_k(retrieved, empty_gt, k=5) == 0.0
+
+    def test_all_relevant_results(self):
+        retrieved = ["c1", "c2", "c3"]
+        gt = {"c1", "c2", "c3"}
+        assert precision_at_k(retrieved, gt, k=3) == 1.0
+        assert recall_at_k(retrieved, gt, k=3) == 1.0
+        assert hit_at_k(retrieved, gt, k=3) == 1.0
+        assert reciprocal_rank(retrieved, gt) == 1.0
+        assert ndcg_at_k(retrieved, gt, k=3) == 1.0
+
+    def test_zero_relevant_results(self):
+        retrieved = ["c1", "c2", "c3"]
+        gt = {"c98", "c99"}
+        assert precision_at_k(retrieved, gt, k=3) == 0.0
+        assert recall_at_k(retrieved, gt, k=3) == 0.0
+        assert hit_at_k(retrieved, gt, k=3) == 0.0
+        assert reciprocal_rank(retrieved, gt) == 0.0
+        assert ndcg_at_k(retrieved, gt, k=3) == 0.0
+
+    def test_invalid_k_values(self):
+        retrieved = ["c1", "c2"]
+        gt = {"c1"}
+        for bad_k in [0, -1, -10]:
+            assert precision_at_k(retrieved, gt, k=bad_k) == 0.0
+            assert recall_at_k(retrieved, gt, k=bad_k) == 0.0
+            assert hit_at_k(retrieved, gt, k=bad_k) == 0.0
+            assert average_precision_at_k(retrieved, gt, k=bad_k) == 0.0
+            assert ndcg_at_k(retrieved, gt, k=bad_k) == 0.0
+
