@@ -1,0 +1,25 @@
+run the project 
+To start the backend:
+cd backend
+.\test_venv\Scripts\Activate.ps1
+uvicorn app.main:app --reload
+
+
+To start the frontend:
+cd frontend
+npm run dev
+
+From the project root, run:
+mysql -u root -p < backend/archive/setup_database_v5.sql
+
+
+
+
+
+
+
+
+
+
+
+https://chatgpt.com/share/6af94f2c-1ca0-83e8-b900-f3880b90f6f3
